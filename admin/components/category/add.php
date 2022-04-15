@@ -37,8 +37,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $files=(object) $_FILES['image'];
     // var_dump($files);exit;
+    $category=(object) $_POST;
     if ($_POST['id'] == 0 && $files->error == 4) {
-        $category=(object) $_POST;
         set_flash_session(
             'catagory_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -49,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
           </div>'
         );
     } elseif ($_POST['id'] == 0 && $files->type != 'image/jpeg' && $files->type != 'image/png') {
-        $category=(object) $_POST;
         set_flash_session(
             'catagory_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -60,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
           </div>'
         );
     } elseif ($files->error==0 && $files->size > 102400) {
-        $category=(object) $_POST;
         set_flash_session(
             'catagory_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -224,7 +222,7 @@ include_once "../../includes/sidebar.php";
                             </div>
                         </div>
                         <div class=" text-center">
-                            <button type="submit" class="btn btn-sm btn-success"><?= $btn_text ?></button>
+                            <button type="submit" class="btn btn-sm btn-success"><?= $btn_text ?></button>&nbsp;&nbsp;<button type="reset" class="btn btn-sm btn-warning text-white">Reset</button>
                         </div>
                     </div>
                     <!-- /.card-body -->

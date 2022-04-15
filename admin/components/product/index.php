@@ -22,12 +22,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Category</h1>
+                    <h1 class="m-0">Product</h1>
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?=BASE_URL?>">Dashboard</a></li>
-                        <li class="breadcrumb-item">Category</li>
+                        <li class="breadcrumb-item">Product</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -38,16 +38,16 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <?=show_flash('category_success') ?>
-            <?=show_flash('category_error') ?>
+            <?=show_flash('product_success') ?>
+            <?=show_flash('product_error') ?>
             <!-- general form elements -->
             <div class="card card-outline card-info">
                 <div class="card-body">
                     <div class="d-flex flex-wrap justify-content-center mb-2">
-                        <a href="<?=BASE_URL?>/components/category" class="btn btn-success btn-sm mr-1 mb-1">ALL</a>
+                        <a href="<?=BASE_URL?>/components/product" class="btn btn-success btn-sm mr-1 mb-1">ALL</a>
                         <?php 
                             for($char=ord('A');$char<=ord('Z');$char++){
-                                echo '<a href="'.BASE_URL.'/components/category/index.php?search='.chr($char).'" class="btn btn-success btn-sm mr-1 mb-1">'.chr($char).'</a>';
+                                echo '<a href="'.BASE_URL.'/components/product/index.php?search='.chr($char).'" class="btn btn-success btn-sm mr-1 mb-1">'.chr($char).'</a>';
                             }
                         ?>
                     </div>
@@ -66,11 +66,11 @@
 
                     <div class="rounded-top" style="border-top: solid 3px #17a2b8;">
                         <div class="text-right my-2">
-                            <a href="<?=BASE_URL?>/components/category/add.php" class="btn btn-sm btn-success">Add
+                            <a href="<?=BASE_URL?>/components/product/add.php" class="btn btn-sm btn-success">Add
                                 New</a>
                         </div>
                         <div class="row mt-4">
-                            <table class="table-sm table-bordered table-hover col-md-11 mx-auto">
+                            <table class="table-sm table-bordered col-md-11 mx-auto rounded">
                                 <thead>
                                     <tr class="text-center table-secondary">
                                         <th>#</th>

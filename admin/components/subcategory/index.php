@@ -3,9 +3,9 @@
     require_once "../../db/connect.php";
     require_once "../../includes/session.php";
     
-    $sql="SELECT c.id,c.name,c.categoryorder,c.isactive,COUNT(s.id) AS no_of_subcategory  FROM category c LEFT JOIN category s ON c.id=s.parent AND s.isactive>:s_active WHERE c.isactive>:c_active AND c.parent=:parent GROUP BY c.id ";
+    $sql="SELECT s.id,s.name,s.categoryorder,s.isactive,c.name as parent from category s join category c on s.parent=c.id and c.isactive=:c_active where s.isactive>:s_active and s.parent>:parent";
     $q=$connect->prepare($sql);
-    $q->execute([':s_active'=>-1,':c_active'=>-1,':parent'=>0]);
+    $q->execute([':c_active'=>1,':s_active'=>-1,':parent'=>0]);
     $page_data=$q->fetchAll(PDO::FETCH_OBJ);
 ?>
 <?php 
@@ -38,8 +38,8 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <?=show_flash('category_success') ?>
-            <?=show_flash('category_error') ?>
+            <?=show_flash('subcategory_success') ?>
+            <?=show_flash('subcategory_error') ?>
             <!-- general form elements -->
             <div class="card card-outline card-info">
                 <div class="card-body">
@@ -70,14 +70,14 @@
                                 New</a>
                         </div>
                         <div class="row mt-4">
-                            <table class="table-sm table-bordered col-md-11 mx-auto rounded">
+                            <table class="table-sm table-bordered table-hover col-md-11 mx-auto rounded">
                                 <thead>
                                     <tr class="text-center table-secondary">
                                         <th>#</th>
-                                        <th class="text-left">Category Name</th>
+                                        <th class="text-left">subcategory Name</th>
                                         <th>Order</th>
+                                        <th>Parent Category</th>
                                         <th>Status</th>
-                                        <th>Number of Sub-category</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -90,8 +90,8 @@
                                             <td><?=$key+1?></td>
                                             <td class="text-left"><?=$value->name?></td>
                                             <td><?=$value->categoryorder?></td>
+                                            <td class="text-left"><?=$value->parent?></td>
                                             <td><?=$value->isactive?'<span class="badge badge-primary">Active</span>':'<span class="badge badge-secondary">Inactive</span>';?></td>
-                                            <td><?=$value->no_of_subcategory?></td>
                                             <td>
                                                 <a href="<?=BASE_URL?>/components/subcategory/add.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
                                                 <a href="<?=BASE_URL?>/components/subcategory/delete.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i></a>

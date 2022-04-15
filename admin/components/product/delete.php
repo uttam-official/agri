@@ -7,9 +7,9 @@
         $q=$connect->prepare("UPDATE category SET isactive=:isactive WHERE id=:id");
         if($q->execute([':isactive'=>-1,':id'=>$_GET['id']])){
             set_flash_session(
-                'subcategory_success',
+                'category_success',
                 '<div class="alert alert-success alert-dismissible fade show" role="alert">
-                Subcategory deleted successfully !
+                Category deleted successfully !
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -17,7 +17,7 @@
             );
         }else{
             set_flash_session(
-                'subcategory_error',
+                'category_error',
                 '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                 Something wents wrong ... please try after some time ... 
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -29,7 +29,7 @@
         header('location:index.php');
     }else{
         set_flash_session(
-            'subcategory_error',
+            'category_error',
             '<div class="alert alert-danger alert-dismissible fade show" role="alert">
             Bad Request!
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
