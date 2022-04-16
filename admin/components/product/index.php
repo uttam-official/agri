@@ -3,9 +3,9 @@
     require_once "../../db/connect.php";
     require_once "../../includes/session.php";
     
-    $sql="SELECT c.id,c.name,c.categoryorder,c.isactive,COUNT(s.id) AS no_of_subcategory  FROM category c LEFT JOIN category s ON c.id=s.parent AND s.isactive>:s_active WHERE c.isactive>:c_active AND c.parent=:parent GROUP BY c.id ";
+    $sql="SELECT p.id,p.name,c.name as category,s.name as subcategory,p.price,p.availability from product p join category c on p.category=c.id and c.isactive=:c_active left join category s on p.subcategory=s.id and s.isactive=:s_active where p.isactive=:p_active ";
     $q=$connect->prepare($sql);
-    $q->execute([':s_active'=>-1,':c_active'=>-1,':parent'=>0]);
+    $q->execute([':c_active'=>1,':s_active'=>1,':p_active'=>1]);
     $page_data=$q->fetchAll(PDO::FETCH_OBJ);
 ?>
 <?php 
@@ -74,10 +74,11 @@
                                 <thead>
                                     <tr class="text-center table-secondary">
                                         <th>#</th>
+                                        <th class="text-left">Product Name</th>
                                         <th class="text-left">Category Name</th>
-                                        <th>Order</th>
-                                        <th>Status</th>
-                                        <th>Number of Sub-category</th>
+                                        <th class="text-left">Subcategory Name</th>
+                                        <th>Price (&dollar;)</th>
+                                        <th>Availabilty</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -89,12 +90,13 @@
                                         <tr class="text-center">
                                             <td><?=$key+1?></td>
                                             <td class="text-left"><?=$value->name?></td>
-                                            <td><?=$value->categoryorder?></td>
-                                            <td><?=$value->isactive?'<span class="badge badge-primary">Active</span>':'<span class="badge badge-secondary">Inactive</span>';?></td>
-                                            <td><?=$value->no_of_subcategory?></td>
+                                            <td class="text-left"><?=$value->category?></td>
+                                            <td class="text-left"><?=$value->subcategory?></td>
+                                            <td><?=$value->price?></td>
+                                            <td><?=$value->availability==1?'<span class="badge badge-info">In Stock</span>':'<span class="badge badge-warning">Out of Stock</span>'?></td>
                                             <td>
-                                                <a href="<?=BASE_URL?>/components/category/add.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
-                                                <a href="<?=BASE_URL?>/components/category/delete.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i></a>
+                                                <a href="<?=BASE_URL?>/components/product/add.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
+                                                <a href="<?=BASE_URL?>/components/product/delete.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i></a>
                                             </td>
                                         </tr>
                                     <?php endforeach;else:?>

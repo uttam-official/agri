@@ -4,12 +4,12 @@
     require_once "../../includes/session.php";
 
     if($_GET['id']>0){
-        $q=$connect->prepare("UPDATE product SET isactive=:isactive WHERE id=:id");
+        $q=$connect->prepare("UPDATE discount SET isactive=:isactive WHERE id=:id");
         if($q->execute([':isactive'=>-1,':id'=>$_GET['id']])){
             set_flash_session(
-                'product_success',
+                'discount_success',
                 '<div class="alert alert-success alert-dismissible fade show" role="alert">
-                Product deleted successfully !
+                Discount deleted successfully !
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -17,7 +17,7 @@
             );
         }else{
             set_flash_session(
-                'product_error',
+                'discount_error',
                 '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                 Something wents wrong ... please try after some time ... 
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -29,7 +29,7 @@
         header('location:index.php');
     }else{
         set_flash_session(
-            'product_error',
+            'discount_error',
             '<div class="alert alert-danger alert-dismissible fade show" role="alert">
             Bad Request!
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">

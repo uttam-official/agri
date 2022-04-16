@@ -23,17 +23,19 @@ function insert_productgallery($product_id,$extension,$connect){
     $q=$connect->prepare("insert into productgallery (product_id,extension) values (:product_id,:extension)");
     return $q->execute([':product_id'=>$product_id,':extension'=>$extension])?1:0;
 }
-function get_category($id, $connect)
+
+//GET PRODUCT
+function get_product($id, $connect)
 {
-    $q = $connect->prepare('SELECT * FROM category WHERE id=:id AND isactive>:isactive');
-    $q->execute([':id' => $id, ':isactive' => -1]);
+    $q = $connect->prepare('SELECT p.name,p.description,p.category,p.subcategory,p.price,p.image_extension,p.availability,p.special,p.featured,GROUP_CONCAT(g.id) as gallery_id,GROUP_CONCAT(g.extension) as gallery FROM product p LEFT JOIN productgallery g ON g.product_id=p.id AND g.isactive=:g_active WHERE p.id=:id AND p.isactive=:p_active GROUP BY g.product_id');
+    $q->execute([':g_active'=>1,':id' => $id, ':p_active' => 1]);
     if ($q->rowCount() > 0) {
         return $q->fetch(PDO::FETCH_OBJ);
     } else {
         set_flash_session(
             'product_error',
             '<div class="alert alert-danger alert-dismissible fade show" role="alert">
-            Category Not Found !
+            Product Not Found !
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -72,6 +74,15 @@ function upload_image($file, $upload_path, $new_width)
     // exit;
     return $progress;
 }
+//DELETE IMAGE
+function delete_image($file){
+    if(file_exists($file)){
+        unlink($file);
+    }
+    return 1;
+}
+
+
 //IMAGE VALIDATION
 function image_validation($file, $size, $key)
 {
@@ -105,9 +116,10 @@ $product = 0;
 $product_id = 0;
 if (isset($_GET['id']) && $_GET['id'] > 0) {
     $product_id = $_GET['id'];
-    $product = get_category($product_id, $connect);
+    $product = get_product($product_id, $connect);
     $heading = "Edit";
     $btn_text = "Update";
+    // var_dump($product->gallery);exit;
 } else {
     $heading = "Add";
     $btn_text = "Add";
@@ -115,9 +127,12 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 //FORM SUBMIT
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $isimage=0;
+    $valid=1;
     if ($_POST['id'] == 0 && $_FILES['image']['error'] == 0) {
+        $isimage=1;
         $valid = image_validation($_FILES['image']['tmp_name'], $_FILES['image']['size'], 'Fetured Image');
-    } else {
+    } elseif($_POST['id']==0) {
         set_flash_session(
             'product_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -141,7 +156,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if ($valid) {
         if ($_POST['id'] > 0) {
             $product_id = $_POST['id'];
-            $sql = "UPADTE product SET name=?,description=?,category=?,subcategory=?,price=?,image_extension=?,availability=?,special=?,featured=? WHERE id=?";
+            $isimage=1;
+            $product=get_product($product_id,$connect);
+            $sql = "UPDATE product SET name=?,description=?,category=?,subcategory=?,price=?,image_extension=?,availability=?,special=?,featured=? WHERE id=?";
         } else {
             $sql = "INSERT INTO product (name,description,category,subcategory,price,image_extension,availability,special,featured) VALUES(?,?,?,?,?,?,?,?,?)";
         }
@@ -151,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $query->bindValue(3, $_POST['category']);
         $query->bindValue(4, isset($_POST['subcategory']) ? $_POST['subcategory'] : null);
         $query->bindValue(5, $_POST['price']);
-        $query->bindValue(6, get_imageextension($_FILES['image']['name']));
+        $query->bindValue(6, $isimage?get_imageextension($_FILES['image']['name']):$product->image_extension);
         $query->bindValue(7, $_POST['availability']);
         $query->bindValue(8, isset($_POST['special']) ? 1 : 0);
         $query->bindValue(9, isset($_POST['featured']) ? 1 : 0);
@@ -161,16 +178,32 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if (!$valid) {
         error_message();
         header('location:index.php');
-    } else {
+    } elseif($_FILES['image']['error'] == 0) {
         $product_id = $_POST['id'] == 0 ? $connect->lastInsertId() : $product_id;
         $upload_path = "../../dist/images/product/";
         $extension = get_imageextension($_FILES['image']['name']);
         $file = $_FILES['image']['tmp_name'];
         $name = $product_id . "." . $extension;
-
+        if($_POST['id']>0 ){
+            delete_image($upload_path . "small/" . $product_id . "." . $product->image_extension);
+            delete_image($upload_path . "medium/" . $product_id . "." . $product->image_extension);
+            delete_image($upload_path . "large/" . $product_id . "." . $product->image_extension);
+        }
         $valid = upload_image($file, $upload_path . "small/" . $name, 100) && upload_image($file, $upload_path . "medium/" . $name, 500) && upload_image($file, $upload_path . "large/" . $name, 1000);
     }
     if ($valid && $_FILES['gallery']['error'][0] == 0) {
+        if($product && $product->gallery!=null){
+            $q1=$connect->prepare("DELETE FROM productgallery WHERE product_id=:product_id");
+            $q1->execute([':product_id'=>$product_id]);
+            $gallery=explode(',',$product->gallery);
+            $upload_path="../../dist/images/productgallery/";
+            foreach($gallery as $key=>$extension){
+                delete_image($upload_path . "small/" . $product_id ."_".$key. "." . $extension);
+                delete_image($upload_path . "medium/" . $product_id ."_".$key. "." . $extension);
+                delete_image($upload_path . "large/" . $product_id ."_".$key. "." . $extension);
+            }
+        }
+        
         foreach ($_FILES['gallery']['tmp_name'] as $key => $file) {
             $upload_path = "../../dist/images/productgallery/";
             $extension = get_imageextension($_FILES['gallery']['name'][$key]);
@@ -184,9 +217,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 break;
             }
         }
-    } else {
-        error_message();
-        header('location:index.php');
     }
     if($valid){
         set_flash_session(
@@ -233,7 +263,7 @@ function get_subcategory($id, $connect)
 
 
 <?php
-$title = "Agri Express > Category > $heading Category";
+$title = "Agri Express > Category > $heading Product";
 require_once "../../includes/header.php";
 include_once "../../includes/preloader.php";
 include_once "../../includes/navbar.php";
@@ -252,7 +282,7 @@ include_once "../../includes/sidebar.php";
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?= BASE_URL ?>">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="<?= BASE_URL ?>/components/category">Product</a></li>
+                        <li class="breadcrumb-item"><a href="<?= BASE_URL ?>/components/product">Product</a></li>
                         <li class="breadcrumb-item active"><?= $heading ?> Product</li>
                     </ol>
                 </div><!-- /.col -->
@@ -318,7 +348,7 @@ include_once "../../includes/sidebar.php";
                                 <label>Description</label>
                             </div>
                             <div class="col-md-10">
-                                <textarea name="description" rows="4" class="form-control" placeholder="Enter product description"></textarea>
+                                <textarea name="description" rows="4" class="form-control" placeholder="Enter product description"><?= $product ? $product->description : '' ?></textarea>
                             </div>
                         </div>
                         <div class="row form-group">
@@ -327,6 +357,15 @@ include_once "../../includes/sidebar.php";
                             </div>
                             <div class="col-md-10">
                                 <input type="number" class="form-control" placeholder="Enter product price" name="price" value="<?= $product ? $product->price : '' ?>" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="offset-md-3 col-md-2">
+                                <?php 
+                                    if($product){
+                                       echo  '<img src="../../dist/images/product/small/'.$product_id.'.'.$product->image_extension.'" class="d-block mx-auto image-responsive mb-3" >';
+                                    }
+                                ?>
                             </div>
                         </div>
                         <div class="row form-group">
@@ -352,6 +391,18 @@ include_once "../../includes/sidebar.php";
                                 </select>
                             </div>
                         </div>
+                        <div class="row gallery mb-3">
+                            <div class="col-md-2"></div>
+                            <?php 
+                                if($product && $product->gallery!=null):
+                                    $gallery=explode(',',$product->gallery);
+                                    foreach($gallery as $key=>$extension):
+                            ?>
+                                <div class="col-md-2">
+                                    <img src="../../dist/images/productgallery/small/<?=$product_id.'_'.$key.'.'.$extension?>" alt="">
+                                </div>
+                            <?php endforeach;endif;?>
+                        </div>
                         <div class="row form-group">
                             <div class="col-md-2">
                                 <label>Gallery Image</label>
@@ -367,17 +418,17 @@ include_once "../../includes/sidebar.php";
                         <div class="row form-group">
                             <div class="offset-md-2 col-md-10 row">
                                 <div class="col-md-3 form-check">
-                                    <input type="checkbox" name="special" class="form-check-input">
+                                    <input type="checkbox" name="special" class="form-check-input" <?= $product && $product->special ? 'checked' : '' ?>>
                                     <label class="form-check-label">Add to Special Product</label>
                                 </div>
                                 <div class="col-md-3 form-check">
-                                    <input type="checkbox" name="featured" class="form-check-input">
+                                    <input type="checkbox" name="featured" class="form-check-input" <?= $product && $product->featured ? 'checked' : '' ?>>
                                     <label class="form-check-label">Add to Featured Product</label>
                                 </div>
                             </div>
                         </div>
                         <div class=" text-center">
-                            <button type="submit" class="btn btn-sm btn-success"><?= $btn_text ?></button>
+                            <button type="submit" class="btn btn-sm btn-success"><?= $btn_text ?></button>&nbsp;&nbsp;<button type="reset" class="btn btn-sm btn-warning text-white">Reset</button>
                         </div>
                     </div>
                     <!-- /.card-body -->

@@ -2,17 +2,17 @@
 require_once "../../includes/verify_login.php";
 require_once "../../db/connect.php";
 require_once "../../includes/session.php";
-function get_subcategory($id, $connect)
+function get_discount($id, $connect)
 {
-    $q = $connect->prepare('SELECT * FROM category WHERE id=:id AND isactive>:isactive AND parent>:parent');
-    $q->execute([':id' => $id, ':isactive' => -1,':parent'=>0]);
+    $q = $connect->prepare('SELECT * FROM discount WHERE id=:id AND isactive>:isactive');
+    $q->execute([':id' => $id, ':isactive' => -1]);
     if ($q->rowCount() > 0) {
         return $q->fetch(PDO::FETCH_OBJ);
     } else {
         set_flash_session(
-            'subcategory_error',
+            'discount_error',
             '<div class="alert alert-danger alert-dismissible fade show" role="alert">
-            Subcategory Not Found !
+            Discount Not Found !
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -21,11 +21,11 @@ function get_subcategory($id, $connect)
         header('location:index.php');
     }
 }
-$subcategory = 0;
-$subcategory_id = 0;
+$discount = 0;
+$discount_id = 0;
 if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $subcategory_id = $_GET['id'];
-    $subcategory = get_subcategory($subcategory_id, $connect);
+    $discount_id = $_GET['id'];
+    $discount = get_discount($discount_id, $connect);
     $heading = "Edit";
     $btn_text = "Update";
 } else {
@@ -36,27 +36,27 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if ($_POST['id'] > 0) {
-        $subcategory_id = $_POST['id'];
-        $subcategory = get_subcategory($subcategory_id, $connect);
-        $sql = "UPDATE category SET name=?,parent=?,categoryorder=?,extension=?,isactive=? WHERE id=?";
+        $discount_id = $_POST['id'];
+        $discount = get_discount($discount_id, $connect);
+        $sql = "UPDATE discount SET name=?,validfrom=?,validtill=?,type=?,amount=?,isactive=? WHERE id=?";
     } else {
-        $sql = "INSERT INTO category (name,parent,categoryorder,extension,isactive) values(?,?,?,?,?)";
+        $sql = "INSERT INTO discount (name,validfrom,validtill,type,amount,isactive) values(?,?,?,?,?,?)";
     }
 
     $q = $connect->prepare($sql);
     $q->bindValue(1, $_POST['name']);
-    $q->bindValue(2, $_POST['parent']);
-    $q->bindValue(3, $_POST['categoryorder']);
-    $q->bindValue(4, '');
-    $q->bindValue(5, $_POST['isactive']);
-    $subcategory_id > 0 ? $q->bindValue(6, $subcategory_id) : '';
-
-
+    $q->bindValue(2, $_POST['validfrom']!=""?:null);
+    $q->bindValue(3, $_POST['validtill']!=""?:null);
+    $q->bindValue(4, $_POST['type']);
+    $q->bindValue(5, $_POST['amount']);
+    $q->bindValue(6, $_POST['isactive']);
+    $discount_id > 0 ? $q->bindValue(7, $discount_id) : '';
+    exit;
     if ($q->execute()) {
         set_flash_session(
-            'subcategory_success',
+            'discount_success',
             '<div class="alert alert-success alert-dismissible fade show" role="alert">
-                Subcategory ' . $btn_text . 'ed Successfully !
+                Discount ' . $btn_text . 'ed Successfully !
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         );
     } else {
         set_flash_session(
-            'subcategory_error',
+            'discount_error',
             '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                 Something wents wrong....  please try after some time ....
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -75,17 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
     header('location:index.php');
 }
-
-
-//GET CATEGORY LIST
-$q = $connect->prepare("select id,name from category where parent=:parent and isactive=:isactive");
-$q->execute([':parent' => 0, ':isactive' => 1]);
-$category_list = $q->fetchAll(PDO::FETCH_OBJ);
 ?>
 
 
 <?php
-$title = "Agri Express > Subcategory > $heading Subcategory";
+$title = "Agri Express > Discount > $heading Discount";
 require_once "../../includes/header.php";
 include_once "../../includes/preloader.php";
 include_once "../../includes/navbar.php";
@@ -99,13 +93,13 @@ include_once "../../includes/sidebar.php";
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0"><?= $heading ?> Subcategory</h1>
+                    <h1 class="m-0"><?= $heading ?> Discount</h1>
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?= BASE_URL ?>">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="<?= BASE_URL ?>/components/subcategory">Subcategory</a></li>
-                        <li class="breadcrumb-item active"><?= $heading ?> Subcategory</li>
+                        <li class="breadcrumb-item"><a href="<?= BASE_URL ?>/components/discount">Discount</a></li>
+                        <li class="breadcrumb-item active"><?= $heading ?> Discount</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -116,44 +110,58 @@ include_once "../../includes/sidebar.php";
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <?= show_flash('subcatagory_warning') ?>
+            <?= show_flash('discount_warning') ?>
             <!-- general form elements -->
             <div class="card card-outline card-info">
                 <div class="card-header">
-                    <h3 class="card-title"><?= $heading ?> Subcategory</h3>
+                    <h3 class="card-title"><?= $heading ?> Discount</h3>
                 </div>
                 <!-- /.card-header -->
                 <!-- form start -->
                 <form action="" method="POST">
-                    <input type="hidden" name="id" value="<?= $subcategory_id ?>">
+                    <input type="hidden" name="id" value="<?= $discount_id ?>">
                     <div class="card-body">
-                        <div class="row form-group">
-                            <div class="col-md-2">
-                                <label>Category <span class="text-danger">*</span></label>
-                            </div>
-                            <div class="col-md-10">
-                                <select name="parent" class="form-control text-uppercase" required>
-                                    <option value="" disabled selected>---Select a category---</option>
-                                    <?php foreach ($category_list as $l) : ?>
-                                        <option value="<?= $l->id ?>" <?=$subcategory && $l->id==$subcategory->parent?"selected":""?>><?= $l->name ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
                         <div class="row form-group">
                             <div class="col-md-2">
                                 <label>Name <span class="text-danger">*</span></label>
                             </div>
                             <div class="col-md-10">
-                                <input type="text" class="form-control" placeholder="Enter category name" name="name" value="<?= $subcategory ? $subcategory->name : '' ?>" required>
+                                <input type="text" class="form-control" placeholder="Enter discount coupon name" name="name" value="<?= $discount ? $discount->name : '' ?>" required>
                             </div>
                         </div>
                         <div class="row form-group">
                             <div class="col-md-2">
-                                <label>Order <span class="text-danger">*</span></label>
+                                <label>Valid From</label>
                             </div>
                             <div class="col-md-10">
-                                <input type="number" class="form-control" placeholder="Enter category Order" name="categoryorder" value="<?= $subcategory ? $subcategory->categoryorder : 0 ?>" required>
+                                <input type="date" class="form-control" name="validfrom" value="<?= $discount ? $discount->validfrom : ''?>">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-2">
+                                <label>Valid Till</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="date" class="form-control" name="validtill" value="<?= $discount ? $discount->validtill : ''?>">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-2">
+                                <label>Type <span class="text-danger">*</span></label>
+                            </div>
+                            <div class="col-md-10">
+                                <select name="type" class="form-control text-uppercase" required>
+                                    <option value="1" <?= $discount && $discount->type == "1" ? 'selected' : '' ?>>Fixed</option>
+                                    <option value="2" <?= $discount && $discount->type == "2" ? 'selected' : '' ?>>Percentage</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-md-2">
+                                <label>Amount <span class="text-danger">*</span></label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="number" class="form-control" placeholder="Enter discount coupon amount" name="amount" value="<?= $discount ? $discount->amount : '' ?>" required>
                             </div>
                         </div>
                         <div class="row form-group">
@@ -162,8 +170,8 @@ include_once "../../includes/sidebar.php";
                             </div>
                             <div class="col-md-10">
                                 <select name="isactive" class="form-control text-uppercase" required>
-                                    <option value="1" <?= $subcategory && $subcategory->isactive == "1" ? 'selected' : '' ?>>Active</option>
-                                    <option value="0" <?= $subcategory && $subcategory->isactive == "0" ? 'selected' : '' ?>>Deactive</option>
+                                    <option value="1" <?= $discount && $discount->isactive == "1" ? 'selected' : '' ?>>Active</option>
+                                    <option value="0" <?= $discount && $discount->isactive == "0" ? 'selected' : '' ?>>Deactive</option>
                                 </select>
                             </div>
                         </div>
