@@ -19,16 +19,17 @@ function error_message()
     );
 }
 //PRODUCT GALLERY
-function insert_productgallery($product_id,$extension,$connect){
-    $q=$connect->prepare("insert into productgallery (product_id,extension) values (:product_id,:extension)");
-    return $q->execute([':product_id'=>$product_id,':extension'=>$extension])?1:0;
+function insert_productgallery($product_id, $extension, $connect)
+{
+    $q = $connect->prepare("insert into productgallery (product_id,extension) values (:product_id,:extension)");
+    return $q->execute([':product_id' => $product_id, ':extension' => $extension]) ? 1 : 0;
 }
 
 //GET PRODUCT
 function get_product($id, $connect)
 {
     $q = $connect->prepare('SELECT p.name,p.description,p.category,p.subcategory,p.price,p.image_extension,p.availability,p.special,p.featured,GROUP_CONCAT(g.id) as gallery_id,GROUP_CONCAT(g.extension) as gallery FROM product p LEFT JOIN productgallery g ON g.product_id=p.id AND g.isactive=:g_active WHERE p.id=:id AND p.isactive=:p_active GROUP BY g.product_id');
-    $q->execute([':g_active'=>1,':id' => $id, ':p_active' => 1]);
+    $q->execute([':g_active' => 1, ':id' => $id, ':p_active' => 1]);
     if ($q->rowCount() > 0) {
         return $q->fetch(PDO::FETCH_OBJ);
     } else {
@@ -75,8 +76,9 @@ function upload_image($file, $upload_path, $new_width)
     return $progress;
 }
 //DELETE IMAGE
-function delete_image($file){
-    if(file_exists($file)){
+function delete_image($file)
+{
+    if (file_exists($file)) {
         unlink($file);
     }
     return 1;
@@ -127,12 +129,20 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 //FORM SUBMIT
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $isimage=0;
-    $valid=1;
+    $isimage = 0;
+    $valid = 1;
+    $temp=$_POST;
+    isset($product->image_extension)?$temp['image_extension']=$product->image_extension:'';
+    isset($product->gallery)?$temp['gallery']=$product->gallery:'';
+    $product = (object) $temp;
     if ($_POST['id'] == 0 && $_FILES['image']['error'] == 0) {
-        $isimage=1;
+        $isimage = 1;
         $valid = image_validation($_FILES['image']['tmp_name'], $_FILES['image']['size'], 'Fetured Image');
-    } elseif($_POST['id']==0) {
+    }
+    if ($_POST['id'] > 0 && $_FILES['image']['error'] == 0) {
+        $isimage = 1;
+        $valid = image_validation($_FILES['image']['tmp_name'], $_FILES['image']['size'], 'Fetured Image');
+    } elseif ($_POST['id'] == 0) {
         set_flash_session(
             'product_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -156,8 +166,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if ($valid) {
         if ($_POST['id'] > 0) {
             $product_id = $_POST['id'];
-            $isimage=1;
-            $product=get_product($product_id,$connect);
+            $isimage = 1;
+            $product = get_product($product_id, $connect);
             $sql = "UPDATE product SET name=?,description=?,category=?,subcategory=?,price=?,image_extension=?,availability=?,special=?,featured=? WHERE id=?";
         } else {
             $sql = "INSERT INTO product (name,description,category,subcategory,price,image_extension,availability,special,featured) VALUES(?,?,?,?,?,?,?,?,?)";
@@ -168,23 +178,24 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $query->bindValue(3, $_POST['category']);
         $query->bindValue(4, isset($_POST['subcategory']) ? $_POST['subcategory'] : null);
         $query->bindValue(5, $_POST['price']);
-        $query->bindValue(6, $isimage?get_imageextension($_FILES['image']['name']):$product->image_extension);
+        $query->bindValue(6, $isimage ? get_imageextension($_FILES['image']['name']) : $product->image_extension);
         $query->bindValue(7, $_POST['availability']);
         $query->bindValue(8, isset($_POST['special']) ? 1 : 0);
         $query->bindValue(9, isset($_POST['featured']) ? 1 : 0);
         $_POST['id'] > 0 ? $query->bindValue(10, $_POST['id']) : '';
-        $valid = $query->execute();
+        if (!$query->execute()) {
+            error_message();
+            header('location:index.php');
+        }
     }
-    if (!$valid) {
-        error_message();
-        header('location:index.php');
-    } elseif($_FILES['image']['error'] == 0) {
+
+    if ($_FILES['image']['error'] == 0 && $valid) {
         $product_id = $_POST['id'] == 0 ? $connect->lastInsertId() : $product_id;
         $upload_path = "../../dist/images/product/";
         $extension = get_imageextension($_FILES['image']['name']);
         $file = $_FILES['image']['tmp_name'];
         $name = $product_id . "." . $extension;
-        if($_POST['id']>0 ){
+        if ($_POST['id'] > 0) {
             delete_image($upload_path . "small/" . $product_id . "." . $product->image_extension);
             delete_image($upload_path . "medium/" . $product_id . "." . $product->image_extension);
             delete_image($upload_path . "large/" . $product_id . "." . $product->image_extension);
@@ -192,45 +203,42 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $valid = upload_image($file, $upload_path . "small/" . $name, 100) && upload_image($file, $upload_path . "medium/" . $name, 500) && upload_image($file, $upload_path . "large/" . $name, 1000);
     }
     if ($valid && $_FILES['gallery']['error'][0] == 0) {
-        if($product && $product->gallery!=null){
-            $q1=$connect->prepare("DELETE FROM productgallery WHERE product_id=:product_id");
-            $q1->execute([':product_id'=>$product_id]);
-            $gallery=explode(',',$product->gallery);
-            $upload_path="../../dist/images/productgallery/";
-            foreach($gallery as $key=>$extension){
-                delete_image($upload_path . "small/" . $product_id ."_".$key. "." . $extension);
-                delete_image($upload_path . "medium/" . $product_id ."_".$key. "." . $extension);
-                delete_image($upload_path . "large/" . $product_id ."_".$key. "." . $extension);
+        if ($product && $product->gallery != null) {
+            $q1 = $connect->prepare("DELETE FROM productgallery WHERE product_id=:product_id");
+            $q1->execute([':product_id' => $product_id]);
+            $gallery = explode(',', $product->gallery);
+            $upload_path = "../../dist/images/productgallery/";
+            foreach ($gallery as $key => $extension) {
+                delete_image($upload_path . "small/" . $product_id . "_" . $key . "." . $extension);
+                delete_image($upload_path . "medium/" . $product_id . "_" . $key . "." . $extension);
+                delete_image($upload_path . "large/" . $product_id . "_" . $key . "." . $extension);
             }
         }
-        
+
         foreach ($_FILES['gallery']['tmp_name'] as $key => $file) {
             $upload_path = "../../dist/images/productgallery/";
             $extension = get_imageextension($_FILES['gallery']['name'][$key]);
 
-            $name = $product_id ."_".$key. "." . $extension;
-            $status=insert_productgallery($product_id,$extension,$connect);
+            $name = $product_id . "_" . $key . "." . $extension;
+            $status = insert_productgallery($product_id, $extension, $connect);
 
             $valid = upload_image($file, $upload_path . "small/" . $name, 100) && upload_image($file, $upload_path . "medium/" . $name, 500) && upload_image($file, $upload_path . "large/" . $name, 1000);
-            if ($valid == 0 || $status==0 ) {
-                $valid=$valid&&$status;
+            if ($valid == 0 || $status == 0) {
+                $valid = $valid && $status;
                 break;
             }
         }
     }
-    if($valid){
+    if ($valid) {
         set_flash_session(
             'product_success',
             '<div class="alert alert-success alert-dismissible fade show" role="alert">
-            Product '.$btn_text.'ed Successfully !
+            Product ' . $btn_text . 'ed Successfully !
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>'
         );
-        header('location:index.php');
-    }else{
-        error_message();
         header('location:index.php');
     }
 }
@@ -320,10 +328,10 @@ include_once "../../includes/sidebar.php";
                         </div>
                         <div class="row form-group">
                             <div class="col-md-2">
-                                <label>Subcategory</label>
+                                <label>Subcategory <span class="text-danger">*</span></label>
                             </div>
                             <div class="col-md-10">
-                                <select name="subcategory" id="subcategory" class="form-control text-uppercase">
+                                <select name="subcategory" id="subcategory" class="form-control text-uppercase" required>
                                     <option value="" disabled selected>---Select a Subcategory---</option>
                                     <?php
                                     if ($product && $product->category > 0) :
@@ -361,10 +369,10 @@ include_once "../../includes/sidebar.php";
                         </div>
                         <div class="row">
                             <div class="offset-md-3 col-md-2">
-                                <?php 
-                                    if($product){
-                                       echo  '<img src="../../dist/images/product/small/'.$product_id.'.'.$product->image_extension.'" class="d-block mx-auto image-responsive mb-3" >';
-                                    }
+                                <?php
+                                if ($product && isset($product->image_extension)) {
+                                    echo  '<img src="../../dist/images/product/small/' . $product_id . '.' . $product->image_extension . '" class="d-block mx-auto image-responsive mb-3" >';
+                                }
                                 ?>
                             </div>
                         </div>
@@ -393,15 +401,16 @@ include_once "../../includes/sidebar.php";
                         </div>
                         <div class="row gallery mb-3">
                             <div class="col-md-2"></div>
-                            <?php 
-                                if($product && $product->gallery!=null):
-                                    $gallery=explode(',',$product->gallery);
-                                    foreach($gallery as $key=>$extension):
+                            <?php
+                            if ($product && isset($product->gallery) && $product->gallery != null) :
+                                $gallery = explode(',', $product->gallery);
+                                foreach ($gallery as $key => $extension) :
                             ?>
-                                <div class="col-md-2">
-                                    <img src="../../dist/images/productgallery/small/<?=$product_id.'_'.$key.'.'.$extension?>" alt="">
-                                </div>
-                            <?php endforeach;endif;?>
+                                    <div class="col-md-2">
+                                        <img src="../../dist/images/productgallery/small/<?= $product_id . '_' . $key . '.' . $extension ?>" alt="">
+                                    </div>
+                            <?php endforeach;
+                            endif; ?>
                         </div>
                         <div class="row form-group">
                             <div class="col-md-2">
@@ -418,11 +427,11 @@ include_once "../../includes/sidebar.php";
                         <div class="row form-group">
                             <div class="offset-md-2 col-md-10 row">
                                 <div class="col-md-3 form-check">
-                                    <input type="checkbox" name="special" class="form-check-input" <?= $product && $product->special ? 'checked' : '' ?>>
+                                    <input type="checkbox" name="special" class="form-check-input" <?= $product && isset($product->special) && $product->special==1 ? 'checked' : '' ?>>
                                     <label class="form-check-label">Add to Special Product</label>
                                 </div>
                                 <div class="col-md-3 form-check">
-                                    <input type="checkbox" name="featured" class="form-check-input" <?= $product && $product->featured ? 'checked' : '' ?>>
+                                    <input type="checkbox" name="featured" class="form-check-input" <?= $product && isset($product->featured) && $product->featured==1 ? 'checked' : '' ?>>
                                     <label class="form-check-label">Add to Featured Product</label>
                                 </div>
                             </div>

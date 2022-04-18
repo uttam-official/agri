@@ -17,7 +17,7 @@
                 <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
                 <li class="nav-item">
-                    <a href="<?=BASE_URL?>" class="nav-link active">
+                    <a href="<?=BASE_URL?>" class="nav-link dashboard">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>
                             Dashboard
@@ -66,7 +66,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?=BASE_URL?>/components/product/" class="nav-link">
+                    <a href="<?=BASE_URL?>/components/customer/" class="nav-link">
                         <i class="nav-icon fa fa-user"></i>
                         <p>
                             Customer
@@ -74,7 +74,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?=BASE_URL?>/components/product/" class="nav-link">
+                    <a href="<?=BASE_URL?>/components/setting/" class="nav-link">
                         <i class="nav-icon fas fa-cog"></i>
                         <p>
                             Setting

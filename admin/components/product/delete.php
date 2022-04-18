@@ -8,7 +8,7 @@
         if($q->execute([':isactive'=>-1,':id'=>$_GET['id']])){
             set_flash_session(
                 'product_success',
-                '<div class="alert alert-success alert-dismissible fade show" role="alert">
+                '<div class="alert alert-danger alert-dismissible fade show" role="alert">
                 Product deleted successfully !
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                   <span aria-hidden="true">&times;</span>

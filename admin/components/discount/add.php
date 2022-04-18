@@ -35,6 +35,7 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    // var_dump($_POST);exit;
     if ($_POST['id'] > 0) {
         $discount_id = $_POST['id'];
         $discount = get_discount($discount_id, $connect);
@@ -42,16 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     } else {
         $sql = "INSERT INTO discount (name,validfrom,validtill,type,amount,isactive) values(?,?,?,?,?,?)";
     }
-
     $q = $connect->prepare($sql);
     $q->bindValue(1, $_POST['name']);
-    $q->bindValue(2, $_POST['validfrom']!=""?:null);
-    $q->bindValue(3, $_POST['validtill']!=""?:null);
+    $q->bindValue(2, $_POST['validfrom'] != "" ? $_POST['validfrom'] : null);
+    $q->bindValue(3, $_POST['validtill'] != "" ? $_POST['validtill'] : null);
     $q->bindValue(4, $_POST['type']);
     $q->bindValue(5, $_POST['amount']);
     $q->bindValue(6, $_POST['isactive']);
     $discount_id > 0 ? $q->bindValue(7, $discount_id) : '';
-    exit;
+    // $q->execute();
+    // $q->queryString;exit;
     if ($q->execute()) {
         set_flash_session(
             'discount_success',
@@ -118,7 +119,9 @@ include_once "../../includes/sidebar.php";
                 </div>
                 <!-- /.card-header -->
                 <!-- form start -->
-                <form action="" method="POST">
+                <form action="" method="POST" onsubmit="return validation()">
+                    <div id="error" class="mt-3 mx-1"></div>
+
                     <input type="hidden" name="id" value="<?= $discount_id ?>">
                     <div class="card-body">
                         <div class="row form-group">
@@ -134,7 +137,7 @@ include_once "../../includes/sidebar.php";
                                 <label>Valid From</label>
                             </div>
                             <div class="col-md-10">
-                                <input type="date" class="form-control" name="validfrom" value="<?= $discount ? $discount->validfrom : ''?>">
+                                <input type="date" class="form-control" name="validfrom" id="valid_from" value="<?= $discount ? $discount->validfrom : '' ?>">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -142,7 +145,7 @@ include_once "../../includes/sidebar.php";
                                 <label>Valid Till</label>
                             </div>
                             <div class="col-md-10">
-                                <input type="date" class="form-control" name="validtill" value="<?= $discount ? $discount->validtill : ''?>">
+                                <input type="date" class="form-control" name="validtill" id="valid_till" value="<?= $discount ? $discount->validtill : '' ?>">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -196,6 +199,18 @@ include_once "../../includes/sidebar.php";
 include_once "../../includes/footer_content.php";
 require_once "../../includes/footer.php";
 ?>
+<script>
+    function validation() {
+        console.log('submitted');
+        $('#error').empty();
+        var from = $('#valid_from').val();
+        var to = $('#valid_till').val();
+        if (Date.parse(from) > Date.parse(to)) {
+            $('#error').html('<p class="alert alert-danger">Valid till date should greter than valid from date !</p>');
+        }
+        return false;
+    }
+</script>
 <script>
     $(function() {
         bsCustomFileInput.init();

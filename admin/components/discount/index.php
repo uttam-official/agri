@@ -1,19 +1,39 @@
-<?php 
-    require_once "../../includes/verify_login.php";
-    require_once "../../db/connect.php";
-    require_once "../../includes/session.php";
-    
-    $sql="SELECT * FROM discount where isactive>:isactive";
-    $q=$connect->prepare($sql);
-    $q->execute([':isactive'=>-1]);
-    $page_data=$q->fetchAll(PDO::FETCH_OBJ);
+<?php
+require_once "../../includes/verify_login.php";
+require_once "../../db/connect.php";
+require_once "../../includes/session.php";
+
+if (isset($_GET['search']) && $_GET['search'] != "") {
+    $key = $_GET['search'] . "%";
+    $sql = "SELECT * FROM discount WHERE isactive>:isactive AND name like :name ORDER BY name";
+    $q = $connect->prepare($sql);
+    $q->execute([':isactive' => -1,':name'=>$key]);
+    $page_data = $q->fetchAll(PDO::FETCH_OBJ);
+    // var_dump($query1);exit;
+} elseif (isset($_GET['srh']) && $_GET['srh'] != "") {
+    $key = "%" . $_GET['srh'] . "%";
+    $sql = "SELECT * FROM discount WHERE isactive>:isactive AND name like :name ORDER BY name";
+    $q = $connect->prepare($sql);
+    $q->execute([':isactive' => -1,':name'=>$key]);
+    $page_data = $q->fetchAll(PDO::FETCH_OBJ);
+    // var_dump($query1);exit;
+} else {
+    $sql = "SELECT * FROM discount WHERE isactive>:isactive";
+    $q = $connect->prepare($sql);
+    $q->execute([':isactive' => -1]);
+    $page_data = $q->fetchAll(PDO::FETCH_OBJ);
+}
+
+
+
+
 ?>
-<?php 
-    $title="Discount Management";
-    require_once "../../includes/header.php";
-    include_once "../../includes/preloader.php";
-    include_once "../../includes/navbar.php";
-    include_once "../../includes/sidebar.php";
+<?php
+$title = "Discount Management";
+require_once "../../includes/header.php";
+include_once "../../includes/preloader.php";
+include_once "../../includes/navbar.php";
+include_once "../../includes/sidebar.php";
 ?>
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -26,7 +46,7 @@
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?=BASE_URL?>">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="<?= BASE_URL ?>">Dashboard</a></li>
                         <li class="breadcrumb-item">Discount</li>
                     </ol>
                 </div><!-- /.col -->
@@ -38,23 +58,23 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <?=show_flash('discount_success') ?>
-            <?=show_flash('discount_error') ?>
+            <?= show_flash('discount_success') ?>
+            <?= show_flash('discount_error') ?>
             <!-- general form elements -->
             <div class="card card-outline card-info">
                 <div class="card-body">
                     <div class="d-flex flex-wrap justify-content-center mb-2">
-                        <a href="<?=BASE_URL?>/components/discount" class="btn btn-success btn-sm mr-1 mb-1">ALL</a>
-                        <?php 
-                            for($char=ord('A');$char<=ord('Z');$char++){
-                                echo '<a href="'.BASE_URL.'/components/discount/index.php?search='.chr($char).'" class="btn btn-success btn-sm mr-1 mb-1">'.chr($char).'</a>';
-                            }
+                        <a href="<?= BASE_URL ?>/components/discount" class="btn btn-success btn-sm mr-1 mb-1">ALL</a>
+                        <?php
+                        for ($char = ord('A'); $char <= ord('Z'); $char++) {
+                            echo '<a href="' . BASE_URL . '/components/discount/index.php?search=' . chr($char) . '" class="btn btn-success btn-sm mr-1 mb-1">' . chr($char) . '</a>';
+                        }
                         ?>
                     </div>
                     <form action="" method="GET" class="">
                         <div class="row mb-3">
                             <div class="col-md-6 offset-md-2">
-                                <input type="text" class="form-control" name="srh">
+                                <input type="text" class="form-control" name="srh" placeholder="Search discount coupon ...">
                             </div>
                             <div class="col-md-2">
                                 <button class="btn btn-success form-control">Search</button>
@@ -66,7 +86,7 @@
 
                     <div class="rounded-top" style="border-top: solid 3px #17a2b8;">
                         <div class="text-right my-2">
-                            <a href="<?=BASE_URL?>/components/discount/add.php" class="btn btn-sm btn-success">Add
+                            <a href="<?= BASE_URL ?>/components/discount/add.php" class="btn btn-sm btn-success">Add
                                 New</a>
                         </div>
                         <div class="row mt-4">
@@ -83,27 +103,28 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php 
-                                        if($page_data && !is_null($page_data)):
-                                            foreach($page_data as $key=>$value):
+                                    <?php
+                                    if ($page_data && !is_null($page_data)) :
+                                        foreach ($page_data as $key => $value) :
                                     ?>
-                                        <tr class="text-center">
-                                            <td><?=$key+1?></td>
-                                            <td class="text-left"><?=$value->name?></td>
-                                            <td><?=$value->validfrom?></td>
-                                            <td><?=$value->validtill?></td>
-                                            <td class="text-left"><?=$value->amount?></td>
-                                            <td><?=$value->isactive?'<span class="badge badge-primary">Active</span>':'<span class="badge badge-secondary">Inactive</span>';?></td>
-                                            <td>
-                                                <a href="<?=BASE_URL?>/components/discount/add.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
-                                                <a href="<?=BASE_URL?>/components/discount/delete.php?id=<?=$value->id?>" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i></a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach;else:?>
+                                            <tr class="text-center">
+                                                <td><?= $key + 1 ?></td>
+                                                <td class="text-left"><?= $value->name ?></td>
+                                                <td><?= date('d-m-Y',strtotime($value->validfrom)) ?></td>
+                                                <td><?= date('d-m-Y',strtotime($value->validfrom)) ?></td>
+                                                <td class="text-left"><?= $value->amount ?></td>
+                                                <td><?= $value->isactive ? '<span class="badge badge-primary">Active</span>' : '<span class="badge badge-secondary">Inactive</span>'; ?></td>
+                                                <td>
+                                                    <a href="<?= BASE_URL ?>/components/discount/add.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
+                                                    <a href="<?= BASE_URL ?>/components/discount/delete.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i></a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach;
+                                    else : ?>
                                         <tr>
                                             <td class="text-center text-danger" colspan="6">No data found !</td>
                                         </tr>
-                                    <?php  endif;?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -120,7 +141,7 @@
 </div>
 <!-- /.content-wrapper -->
 
-<?php 
-    include_once '../../includes/footer_content.php';
-    require_once '../../includes/footer.php';
+<?php
+include_once '../../includes/footer_content.php';
+require_once '../../includes/footer.php';
 ?>
