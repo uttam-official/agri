@@ -1,0 +1,214 @@
+.navMenu-main{display:none;}
+@media screen and (max-width: 991px) {	
+#slidingMenu{
+	margin:0;
+    position: fixed;
+    background-color:#000;
+    width:245px;
+    height:100%;
+    top:0;
+    right:-245px;
+	z-index:991;
+	text-align:center;
+	background: rgba(0, 0, 0, .9);
+	overflow-y: auto;
+	 -webkit-overflow-scrolling: touch;
+	 
+}
+
+#slidingMenu::-webkit-scrollbar { 
+   display: none; 
+ }
+ 
+ 
+nav#navMenu { /* MENU */
+	position:absolute;
+	top:72px;
+	text-align:right;
+	width:100%;
+}
+
+
+
+.navMenu-main {
+	margin: 0;
+	padding: 0;
+	display:block;
+	color: #FFF;
+	font-weight: 300;
+	line-height: 60px;
+	list-style:none;
+	max-width:70px;
+	position:fixed;
+	right:10px;
+	top:10px;
+	z-index:992;
+}
+
+
+/* 1.1 MENU TRIGGER
+-----------------------------------------------------------------------------------------------
+===============================================================================================*/
+
+.navMenu-main #menu {
+	display:block;
+	width: 40px;
+	float:left;
+	background:#8dc63f;
+    cursor:pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	 -khtml-user-select: none;
+	   -moz-user-select: none;
+	    -ms-user-select: none;
+			 user-select: none;
+			 
+}
+
+.navMenu-main #menu:hover {
+	background:#000;		 
+}
+
+.navMenu-main:after {
+	display: table;
+	clear: both;
+	content: "";
+}
+
+
+/* 1.1 TRIGGER 
+-----------------------------------------------------------------------------------------------
+===============================================================================================*/
+
+.gn-icon::before {
+	display: inline-block;
+	width: 60px;
+	text-align: center;
+	text-transform: none;
+	font-weight: normal;
+	font-style: normal;
+	font-variant: normal;
+	font-family: 'finalelements';
+	line-height: 1;
+	speak: none;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* if an icon anchor has a span, hide the span */
+
+.gn-iconMenu {
+	background:#871619;
+	padding-left:63px;	
+}
+
+.gn-icon-menu {
+	display:inline-block;
+	width: 60px;
+	max-width:60px;
+	height: auto;
+	margin:0 auto;
+	padding:0px 10px 0px 10px;
+
+}
+
+.gn-icon-menu::before {
+	display:block;
+	background: #8dc63f;
+	width: 60px;
+	height:60px;
+	font-size: 10px; /* change this */
+  	margin: 4em auto;
+  	padding: 2.5em 2em;
+
+}
+
+.gn-icon-menu span {
+  background: #FFF;
+  display:inline-block;
+  position: relative;
+  margin-bottom:5px;
+  -webkit-transform: translate3d(0,0,0);
+}
+
+.gn-icon-scrolldown::before {
+	content: "\e609";
+	font-size:70px;	
+}
+
+.gn-icon-menu span,
+.gn-icon-menu span:before,
+.gn-icon-menu span:after {
+  width: 100%;
+  height: .2em;
+  -moz-transition:       all 0.4s;
+  -o-transition:         all 0.4s;
+  -webkit-transition:    all 0.4s;
+  transition:            all 0.4s;
+  -webkit-transform: translate3d(0,0,0);
+}
+
+.gn-icon-menu span:before,
+.gn-icon-menu span:after {
+  background: #FFF;
+  content: " ";
+  margin-top: -.6em;
+  position: absolute;
+}
+
+.gn-icon-menu span:after {
+  margin-top: .6em;
+}
+
+.gn-icon-menu.on span {
+  background: transparent;
+}
+
+.gn-icon-menu.on span:before {
+  -moz-transform: rotate(45deg) translate(.5em, .4em);
+  -ms-transform: rotate(45deg) translate(.5em, .4em);
+  -o-transform: rotate(45deg) translate(.5em, .4em);
+  -webkit-transform: rotate(45deg) translate(.5em, .4em);
+  transform: rotate(45deg) translate(.5em, .4em);
+}
+
+.gn-icon-menu.on span:after {
+  -moz-transform: rotate(-45deg) translate(.45em, -.35em);
+  -ms-transform: rotate(-45deg) translate(.45em, -.35em);
+  -o-transform: rotate(-45deg) translate(.45em, -.35em);
+  -webkit-transform: rotate(-45deg) translate(.45em, -.35em);
+  transform: rotate(-45deg) translate(.45em, -.35em);
+}
+
+#slidingMenu{display:block;}
+#slidingMenu ul{padding:0; margin:0; list-style:none; display:block !important; text-align:left; float:none; border:none;}
+#slidingMenu ul li{float:none; padding:0; margin:0 0 1px; background:none; width:auto; border:none;}
+#slidingMenu ul li a{padding:5px 10px; display:block; margin:0; color:#fff; font:400 16px/24px "Open Sans",sans-serif; text-decoration:none;}
+#slidingMenu ul ul{display:block; position:static; left:auto; float:none; width:100%; background:none; padding:0; margin:0;}
+#slidingMenu ul ul ul{top:0;}
+#slidingMenu ul ul li{width:100%; float:none; padding:0; background:none; border:none;}
+#slidingMenu ul ul li a{padding:5px 10px 5px 20px;}
+#slidingMenu ul ul ul li a{padding:5px 15px;}
+#slidingMenu ul li a:hover,
+#slidingMenu ul li:hover > a,
+#slidingMenu ul li a.active{color:#fff !important; background:#8dc63f; border-radius:0; box-shadow:none;}
+#slidingMenu ul ul ul{left:auto; position:relative; width:100%; background:none;}
+#slidingMenu ul ul li a:hover, 
+#slidingMenu ul ul li:hover > a,
+#slidingMenu ul ul li a.active{color:#8dc63f !important; background:none;}
+
+.navMenu-main #menu{width:40px;}
+.navMenu-main{line-height:40px;}
+}
+@media only screen and (max-width:685px)  {
+nav#navMenu{top:100px;}
+}
+@media only screen and (max-width:480px)  {
+
+#slidingMenu{ background: rgba(0, 0, 0, 1.0); }
+nav#navMenu { font-size: 1.5em; padding-bottom:90px; line-height:60px; top:80px; }
+}
+
+
+@media only screen and (min-width:481px) and (max-width: 767px) {
+nav#navMenu { font-size: 3.0em; padding-bottom:90px;}
+}

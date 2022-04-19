@@ -37,8 +37,8 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $files=(object) $_FILES['image'];
     // var_dump($files);exit;
-    $category=(object) $_POST;
     if ($_POST['id'] == 0 && $files->error == 4) {
+        $category=(object) $_POST;
         set_flash_session(
             'catagory_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
           </div>'
         );
     } elseif ($_POST['id'] == 0 && $files->type != 'image/jpeg' && $files->type != 'image/png') {
+        $category=(object) $_POST;
         set_flash_session(
             'catagory_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -59,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
           </div>'
         );
     } elseif ($files->error==0 && $files->size > 102400) {
+        $category=(object) $_POST;
         set_flash_session(
             'catagory_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -201,7 +203,7 @@ include_once "../../includes/sidebar.php";
                         ?>
                         <div class="row form-group">
                             <div class="col-md-2">
-                                <label>Image <span class="text-danger"><?=$category_id?'':"*"?></span></label>
+                                <label>Image <span class="text-danger"><?=$category_id>0?'':"*"?></span></label>
                             </div>
                             <div class="col-md-10">
                                 <div class="custom-file">

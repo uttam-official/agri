@@ -74,10 +74,10 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?=BASE_URL?>/components/setting/" class="nav-link">
+                    <a href="<?=BASE_URL?>/components/settings/" class="nav-link">
                         <i class="nav-icon fas fa-cog"></i>
                         <p>
-                            Setting
+                            Settings
                         </p>
                     </a>
                 </li>

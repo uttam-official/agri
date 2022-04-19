@@ -129,20 +129,21 @@ if (isset($_GET['id']) && $_GET['id'] > 0) {
 
 //FORM SUBMIT
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $isimage = 0;
+    $isimage=$_FILES['image']['error']==4?0:1;
+    
     $valid = 1;
     $temp=$_POST;
     isset($product->image_extension)?$temp['image_extension']=$product->image_extension:'';
     isset($product->gallery)?$temp['gallery']=$product->gallery:'';
+    isset($_POST['special'])?$temp['special']=1:'';
+    isset($_POST['featured'])?$temp['featured']=1:'';
     $product = (object) $temp;
     if ($_POST['id'] == 0 && $_FILES['image']['error'] == 0) {
-        $isimage = 1;
         $valid = image_validation($_FILES['image']['tmp_name'], $_FILES['image']['size'], 'Fetured Image');
     }
     if ($_POST['id'] > 0 && $_FILES['image']['error'] == 0) {
-        $isimage = 1;
         $valid = image_validation($_FILES['image']['tmp_name'], $_FILES['image']['size'], 'Fetured Image');
-    } elseif ($_POST['id'] == 0) {
+    } elseif ($_POST['id'] == 0 && $_FILES['image']['error'] == 4) {
         set_flash_session(
             'product_warning',
             '<div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -166,7 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     if ($valid) {
         if ($_POST['id'] > 0) {
             $product_id = $_POST['id'];
-            $isimage = 1;
             $product = get_product($product_id, $connect);
             $sql = "UPDATE product SET name=?,description=?,category=?,subcategory=?,price=?,image_extension=?,availability=?,special=?,featured=? WHERE id=?";
         } else {
@@ -209,9 +209,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $gallery = explode(',', $product->gallery);
             $upload_path = "../../dist/images/productgallery/";
             foreach ($gallery as $key => $extension) {
-                delete_image($upload_path . "small/" . $product_id . "_" . $key . "." . $extension);
-                delete_image($upload_path . "medium/" . $product_id . "_" . $key . "." . $extension);
-                delete_image($upload_path . "large/" . $product_id . "_" . $key . "." . $extension);
+                delete_image($upload_path . "small/"  . $extension);
+                delete_image($upload_path . "medium/"  . $extension);
+                delete_image($upload_path . "large/"  . $extension);
             }
         }
 
@@ -220,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $extension = get_imageextension($_FILES['gallery']['name'][$key]);
 
             $name = $product_id . "_" . $key . "." . $extension;
-            $status = insert_productgallery($product_id, $extension, $connect);
+            $status = insert_productgallery($product_id, $name, $connect);
 
             $valid = upload_image($file, $upload_path . "small/" . $name, 100) && upload_image($file, $upload_path . "medium/" . $name, 500) && upload_image($file, $upload_path . "large/" . $name, 1000);
             if ($valid == 0 || $status == 0) {
@@ -406,8 +406,8 @@ include_once "../../includes/sidebar.php";
                                 $gallery = explode(',', $product->gallery);
                                 foreach ($gallery as $key => $extension) :
                             ?>
-                                    <div class="col-md-2">
-                                        <img src="../../dist/images/productgallery/small/<?= $product_id . '_' . $key . '.' . $extension ?>" alt="">
+                                    <div class="col-md-2 mb-1">
+                                        <img src="../../dist/images/productgallery/small/<?= $extension ?>" alt="" class="image-responsive d-block mx-auto">
                                     </div>
                             <?php endforeach;
                             endif; ?>
