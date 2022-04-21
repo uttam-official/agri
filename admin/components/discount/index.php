@@ -110,8 +110,8 @@ include_once "../../includes/sidebar.php";
                                             <tr class="text-center">
                                                 <td><?= $key + 1 ?></td>
                                                 <td class="text-left"><?= $value->name ?></td>
-                                                <td><?= date('d-m-Y',strtotime($value->validfrom)) ?></td>
-                                                <td><?= date('d-m-Y',strtotime($value->validfrom)) ?></td>
+                                                <td><?= $value->validfrom!=null?date('d-m-Y',strtotime($value->validfrom)):'' ?></td>
+                                                <td><?= $value->validtill!=null?date('d-m-Y',strtotime($value->validtill)):'' ?></td>
                                                 <td class="text-left"><?= $value->amount ?></td>
                                                 <td><?= $value->isactive ? '<span class="badge badge-primary">Active</span>' : '<span class="badge badge-secondary">Inactive</span>'; ?></td>
                                                 <td>

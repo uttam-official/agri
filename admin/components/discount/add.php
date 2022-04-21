@@ -207,8 +207,9 @@ require_once "../../includes/footer.php";
         var to = $('#valid_till').val();
         if (Date.parse(from) > Date.parse(to)) {
             $('#error').html('<p class="alert alert-danger">Valid till date should greter than valid from date !</p>');
+            return false;
         }
-        return false;
+        return true;
     }
 </script>
 <script>

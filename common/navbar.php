@@ -6,14 +6,14 @@
     <div class="container">
         <div id="slidingMenu">
             <nav id="navMenu">
-                <ul>
-                    <li><a class="active" href="<?= BASE_URL ?>">Home</a></li>
+                <ul class="nav">
+                    <li><a href="<?= BASE_URL ?>" class="home">Home</a></li>
                     <?php foreach (get_category($connect) as $l) :?>
-                            <li><a href="#"><?= $l->name ?></a>
+                            <li><a href="<?=BASE_URL.'category.php?cid='.$l->id?>"><?= $l->name ?></a>
                                 <ul>
                                     <?php 
                                         foreach(get_subcategory($l->id,$connect) as $sl){
-                                            echo '<li><a href="#">'.$sl->name.'</a></li>';
+                                            echo '<li><a href="'.BASE_URL.'category.php?cid='.$l->id.'&sid='.$sl->id.'">'.$sl->name.'</a></li>';
                                         }
                                     ?>
                                 </ul>

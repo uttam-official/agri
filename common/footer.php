@@ -6,14 +6,9 @@
           <h4>Navigation</h4>
           <ul class="list-unstyled">
             <li><a href="#">Home</a></li>
-            <li><a href="#">Animal Dosing</a></li>
-            <li><a href="#">Cattle</a></li>
-            <li><a href="#">Sheep</a></li>
-            <li><a href="#">Horses</a></li>
-            <li><a href="#">Fencing</a></li>
-            <li><a href="#">Hardware</a></li>
-            <li><a href="#">Clothing & Footwear</a></li>
-            <li><a href="#">Pets</a></li>
+            <?php foreach (get_category($connect) as $l) : ?>
+              <li><a href="<?= BASE_URL . 'category.php?cid=' . $l->id ?>"><?= $l->name ?></a></li>
+            <?php endforeach; ?>
           </ul>
         </aside>
       </div>
@@ -54,5 +49,19 @@
 </div>
 
 </body>
+<script>
+  /*** add active class and stay opened when selected ***/
+  var url = window.location;
+  var server = window.location.origin;
+
+  // for sidebar menu entirely but not cover treeview
+  $('ul.nav a').filter(function() {
+    if (this.href) {
+      return this.href == url || (url.href.indexOf(this.href+'&sid') == 0);
+    }
+  }).addClass('active');
+  //Dashboard
+  window.location.href == `${server}/agri/` ? $('.home').addClass('active') : $('.home').removeClass('active');
+</script>
 
 </html>

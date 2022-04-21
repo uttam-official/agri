@@ -89,7 +89,7 @@ include_once "../../includes/sidebar.php";
                                 <thead>
                                     <tr class="text-center table-secondary">
                                         <th>#</th>
-                                        <th class="text-left">Product Name</th>
+                                        <th class="text-left col-md-4">Product Name</th>
                                         <th class="text-left">Category Name</th>
                                         <th class="text-left">Subcategory Name</th>
                                         <th>Price (&dollar;)</th>

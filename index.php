@@ -1,4 +1,5 @@
 <?php
+session_status()==1?session_start():'';
 require_once "db/connect.php";
 require_once "common/functions.php";
 $title = "Agri Express";
@@ -24,198 +25,30 @@ include_once 'common/navbar.php';
                     </div>
                     <div class="row">
                         <div id="carouse21" class="owl-carousel">
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product1.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
+                            <?php foreach (get_random_special_product($connect) as $l) : ?>
+                                <div class="item">
+                                    <div class="product-layout">
+                                        <div class="product-thumb transition">
+                                            <a href="<?= BASE_URL . 'product.php?id=' . $l->id; ?>">
+                                                <div class="image" style="display:flex;align-items:center;height: 150px;">
+                                                    <img src="<?= BASE_URL . '/admin/dist/images/product/small/' . $l->id . '.' . $l->image_extension ?>" alt="" title="" class="img-responsive" />
+                                                </div>
+                                            </a>
+                                            <div class="caption">
+                                                <h4><a href="<?= BASE_URL . 'product.php?id=' . $l->id; ?>"><?= $l->name; ?></a></h4>
+                                                <div class="rating">
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                </div>
+                                                <p class="price">&#8364; <?= $l->price ?></p>
                                             </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Chapron Sec 10000</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product2.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Pel Solar Fencer 702s</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product3.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Pel Solar Fencer 702s</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product4.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Screw Insulators 25 Pack</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product1.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Chapron Sec 10000</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product2.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Pel Solar Fencer 702s</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product3.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Pel Solar Fencer 702s</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product4.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Screw Insulators 25 Pack</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
@@ -237,8 +70,8 @@ include_once 'common/navbar.php';
                                 <div class="item">
                                     <div class="product-layout">
                                         <div class="cat-thumb">
-                                            <div class="image"><a href="#"><img src="admin/dist//images/category/<?= $l->id . '.' . $l->extension ?>" alt="" title="" class="img-responsive" /></a></div>
-                                            <h4><a href="#"><?= $l->name ?></a></h4>
+                                            <div class="image"><a href="<?=BASE_URL.'category.php?cid='.$l->id?>"><img src="admin/dist//images/category/<?= $l->id . '.' . $l->extension ?>" alt="" title="" class="img-responsive" /></a></div>
+                                            <h4><a href="<?=BASE_URL.'category.php?cid='.$l->id?>"><?= $l->name ?></a></h4>
                                         </div>
                                     </div>
                                 </div>
@@ -274,198 +107,31 @@ include_once 'common/navbar.php';
                     </div>
                     <div class="row">
                         <div id="carouse22" class="owl-carousel">
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product5.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
+                            <?php foreach (get_random_special_product($connect) as $l) : ?>
+                                <div class="item">
+                                    <div class="product-layout">
+                                        <div class="product-thumb transition">
+                                            <a href="<?= BASE_URL . 'product.php?id=' . $l->id; ?>">
+                                            <div class="image" style="display:flex;align-items:center;height: 150px;">
+                                                <img src="<?= BASE_URL . '/admin/dist/images/product/small/' . $l->id . '.' . $l->image_extension ?>" alt="" title="" class="img-responsive" />
+
                                             </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Rodilon Trio 800G</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                            </a>
+                                            <div class="caption">
+                                                <h4><a href="<?= BASE_URL . 'product.php?id=' . $l->id; ?>"><?=$l->name?></a></h4>
+                                                <div class="rating">
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                    <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                                                </div>
+                                                <p class="price">&#8364; <?=$l->price?></p>
                                             </div>
-                                            <p class="price">&#8364; 187.00</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product6.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Storm Secure 1Kg</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product7.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Blue Castle Junior Boilersuit</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product8.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Reflective Paw Print Webbing</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product5.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Rodilon Trio 800G</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product6.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Storm Secure 1Kg</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product7.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Blue Castle Junior Boilersuit</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item">
-                                <div class="product-layout">
-                                    <div class="product-thumb transition">
-                                        <div class="image">
-                                            <img src="images/product8.jpg" alt="" title="" class="img-responsive" />
-                                            <div class="hover">
-                                                <button type="button" data-toggle="tooltip" title="Add to Wish List"><i class="fa fa-heart"></i></button>
-                                                <button type="button" data-toggle="tooltip" title="Add to Cart"><i class="fa fa-shopping-basket"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="caption">
-                                            <h4><a href="#">Reflective Paw Print Webbing</a></h4>
-                                            <div class="rating">
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                                            </div>
-                                            <p class="price">&#8364; 187.00</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
