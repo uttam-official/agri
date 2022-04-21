@@ -99,5 +99,23 @@ function remove_cart($id){
 	session_status()==1?session_start():'';
 	unset($_SESSION['cart'][$id]);
 }
-
+//VALIDATE COUPON
+function validate_coupon($coupon,$connect){
+    $q=$connect->prepare('SELECT validfrom,validtill,amount,type FROM discount WHERE name=:name AND isactive=:isactive');
+    $q->execute([':name'=>$coupon,':isactive'=>1]);
+    if($q->rowCount()>0){
+        $data=$q->fetch(PDO::FETCH_OBJ);
+        $validfrom=$data->validfrom;
+        $validtill=$data->validtill;
+        $stat1=$validfrom!=null?(date('Y-m-d',strtotime($validfrom))<=date('Y-m-d')?1:0):1;
+        $stat2=$validtill!=null?(date('Y-m-d',strtotime($validtill))>=date('Y-m-d')?1:0):1;
+        if($stat1 && $stat2){
+            return ['status'=>true,'amount'=>$data->amount,'type'=>$data->type];
+        }else{ 
+            return ['status'=>false];
+        }
+    }else{
+        return ['status'=>false];
+    }
+}
 ?>

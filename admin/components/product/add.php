@@ -48,9 +48,9 @@ function get_product($id, $connect)
 //RESIZE IMAGE
 function resize_image($resource_type, $width, $height, $new_width)
 {
-    $new_height = $new_width * $height / $width;
-    $image_layer = imagecreatetruecolor($new_width, $new_height);
-    imagecopyresampled($image_layer, $resource_type, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+    
+    $image_layer = imagecreatetruecolor($new_width, $new_width);
+    imagecopyresampled($image_layer, $resource_type, 0, 0,0, 0, $new_width, $new_width, $width, $height);
     return $image_layer;
 }
 //UPLOAD IMAGE

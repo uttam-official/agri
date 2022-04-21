@@ -1,9 +1,9 @@
 <?php
-session_status()==1?session_start():'';
+session_status() == 1 ? session_start() : '';
 require_once './db/connect.php';
 require_once './common/functions.php';
-if(isset($_POST['add_to_cart']) && $_POST['add_to_cart']='add_to_cart'){
-  $status=add_to_cart($_POST['product_id'],$_POST['quantity'],$connect);
+if (isset($_POST['add_to_cart']) && $_POST['add_to_cart'] = 'add_to_cart') {
+  $status = add_to_cart($_POST['product_id'], $_POST['quantity'], $connect);
 }
 
 if ($_GET['id'] && $_GET['id'] > 0) {
@@ -14,9 +14,20 @@ if ($_GET['id'] && $_GET['id'] > 0) {
 }
 $title = $product->name;
 require_once './common/header.php';
-include_once './common/navbar.php';
-?>
 
+include_once './common/navbar.php';
+
+?>
+<style>
+  #gal1 img {
+    border: 2px solid white;
+  }
+
+  /*Change the colour*/
+  .active img {
+    border: 2px solid #333 !important;
+  }
+</style>
 <div class="banner-in">
   <div class="container">
     <h1><?= $title ?></h1>
@@ -29,33 +40,42 @@ include_once './common/navbar.php';
   </div>
 </div>
 <div id="main-container">
-  <?=isset($status) && $status==1?'<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <?= isset($status) && $status == 1 ? '<div class="alert alert-success alert-dismissible fade show" role="alert">
             Product sucessfully added   !  
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-          </div>':""?>
+          </div>' : "" ?>
   <div class="container">
 
     <div class="row">
       <div class="col-sm-12" id="content">
 
         <div class="row">
-          <div class="col-sm-5">
-            <ul class="thumbnails">
-              <li><a title="<?= $title ?>" href="<?= BASE_URL . 'admin/dist/images/product/large/' . $product->id . '.' . $product->image_extension ?>" class="thumbnail"><img alt="<?= $title ?>" title="<?= $title ?>" src="<?= BASE_URL . 'admin/dist/images/product/medium/' . $product->id . '.' . $product->image_extension ?>"></a></li>
-              <?php if(isset($product->gallery)):foreach (explode(',', $product->gallery) as $l) : ?>
-                <li class="image-additional"><a title="<?= $title ?>" href="<?= BASE_URL . 'admin/dist/images/productgallery/large/' .$l ?>" class="thumbnail"> <img alt="<?= $title ?>" title="<?= $title ?>" src="<?= BASE_URL . 'admin/dist/images/productgallery/small/' .$l ?>"></a></li>
-              <?php endforeach; endif;?>
-            </ul>
+          <div class="col-sm-4">
+            <img id="zoom_01" src='<?= BASE_URL . 'admin/dist/images/product/medium/' . $product->id . '.' . $product->image_extension ?>' data-zoom-image="<?= BASE_URL . 'admin/dist/images/product/large/' . $product->id . '.' . $product->image_extension ?>" />
+            <br><br>
+            <div id="gal1">
+              <a href="#" data-image="<?= BASE_URL . 'admin/dist/images/product/medium/' . $product->id . '.' . $product->image_extension ?>" data-zoom-image="<?= BASE_URL . 'admin/dist/images/product/large/' . $product->id . '.' . $product->image_extension ?>" class="active">
+                <img id="zoom_01" src="<?= BASE_URL . 'admin/dist/images/product/small/' . $product->id . '.' . $product->image_extension ?>">
+              </a>
+              <?php if (isset($product->gallery)) : foreach (explode(',', $product->gallery) as $l) : ?>
+                  <a href="#" data-image="<?= BASE_URL . 'admin/dist/images/productgallery/medium/' . $l ?>" data-zoom-image="<?= BASE_URL . 'admin/dist/images/productgallery/large/' . $l ?>">
+                    <img id="zoom_01" src="<?= BASE_URL . 'admin/dist/images/productgallery/small/' . $l ?>">
+                  </a>
+              <?php endforeach;
+              endif; ?>
+            </div>
+
           </div>
-          <div class="col-sm-7">
+          <div class="col-sm-1"></div>
+          <div class=" col-sm-7">
             <div class="pdoduct-details">
               <div class="pdoduct-header">
                 <h1><?= $title ?></h1>
 
                 <h2>€<?= $product->price ?></h2>
-                <button  title="" class="btn btn-wishlist" data-toggle="tooltip" type="button" data-original-title="Add to Wish List"><i class="fa fa-heart"></i></button>
+                <button title="" class="btn btn-wishlist" data-toggle="tooltip" type="button" data-original-title="Add to Wish List"><i class="fa fa-heart"></i></button>
               </div>
               <hr>
               <ul class="list-unstyled">
@@ -68,9 +88,9 @@ include_once './common/navbar.php';
               <div id="product">
                 <form action="" method="POST" class="form-group clearfix">
                   <label for="input-quantity" class="control-label">Qty</label>
-                  <input type="number" min="1"; class="form-control" id="input-quantity" size="2" value="1" name="quantity" vk_106cf="subscribed" required>
-                  <input type="hidden" value="<?=$product->id?>" name="product_id">
-                  <button class="btn btn-default btn-lg" id="button-cart" type="submit" name="add_to_cart" value="add_to_cart" <?=$product->availability==0?"disabled":"";?>>Add to Cart</button>
+                  <input type="number" min="1" ; class="form-control" id="input-quantity" size="2" value="1" name="quantity" vk_106cf="subscribed" required>
+                  <input type="hidden" value="<?= $product->id ?>" name="product_id">
+                  <button class="btn btn-default btn-lg" id="button-cart" type="submit" name="add_to_cart" value="add_to_cart" <?= $product->availability == 0 ? "disabled" : ""; ?>>Add to Cart</button>
                 </form>
               </div>
               <hr>
@@ -154,29 +174,30 @@ include_once './common/navbar.php';
           <h3>Related Products</h3>
           <div class="row">
             <div id="carouse21" class="owl-carousel">
-              <?php foreach(get_related_product($product->id,$connect) as $l): ?>
-              <div class="item">
-                <div class="product-layout">
-                  <div class="product-thumb transition">
-                    <a href="<?= BASE_URL . 'product.php?id=' . $l->id; ?>">
-                    <div class="image" style="display:flex;align-items:center;height: 150px;">
-                      <img src="<?= BASE_URL . '/admin/dist/images/product/small/' . $l->id . '.' . $l->image_extension ?>" alt="" title="" class="img-responsive" />
-                    </div></a>
-                    <div class="caption">
-                      <h4><a href="#"><?=$l->name?></a></h4>
-                      <div class="rating">
-                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-                        <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+              <?php foreach (get_related_product($product->id, $connect) as $l) : ?>
+                <div class="item">
+                  <div class="product-layout">
+                    <div class="product-thumb transition">
+                      <a href="<?= BASE_URL . 'product.php?id=' . $l->id; ?>">
+                        <div class="image" style="display:flex;align-items:center;height: 150px;">
+                          <img src="<?= BASE_URL . '/admin/dist/images/product/small/' . $l->id . '.' . $l->image_extension ?>" alt="" title="" class="img-responsive" />
+                        </div>
+                      </a>
+                      <div class="caption">
+                        <h4><a href="#"><?= $l->name ?></a></h4>
+                        <div class="rating">
+                          <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                          <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                          <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                          <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                          <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                        </div>
+                        <p class="price">&#8364; <?= $l->price ?></p>
                       </div>
-                      <p class="price">&#8364; <?=$l->price?></p>
                     </div>
                   </div>
                 </div>
-              </div>
-              <?php endforeach;?>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
@@ -198,7 +219,7 @@ include_once './common/navbar.php';
       </div>
     </div>
 
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
       $(document).ready(function() {
         $('.thumbnails').magnificPopup({
           type: 'image',
@@ -207,6 +228,23 @@ include_once './common/navbar.php';
             enabled: true
           }
         });
+      });
+    </script> -->
+    <script>
+      //initiate the plugin and pass the id of the div containing gallery images
+      $("#zoom_01").elevateZoom({
+        gallery: 'gal1',
+        cursor: 'pointer',
+        galleryActiveClass: 'active',
+        imageCrossfade: true,
+        loadingIcon: 'http://www.elevateweb.co.uk/spinner.gif'
+      });
+
+      //pass the images to Fancybox
+      $("#zoom_01").bind("click", function(e) {
+        var ez = $('#zoom_01').data('elevateZoom');
+        $.fancybox(ez.getGalleryList());
+        return false;
       });
     </script>
   </div>

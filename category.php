@@ -20,10 +20,10 @@ include_once "./common/navbar.php";
 
 <div class="banner-in">
   <div class="container">
-    <h1>Category</h1>
+    <h1>Products</h1>
     <ul class="newbreadcrumb">
       <li><a href="<?= BASE_URL ?>">Home</a></li>
-      <li>Category</li>
+      <li>Products</li>
     </ul>
   </div>
 </div>

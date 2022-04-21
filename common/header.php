@@ -22,7 +22,6 @@
   <link href="<?= BASE_URL ?>stylesheet/responsive.css" rel="stylesheet">
   <link href="<?= BASE_URL ?>stylesheet/menu.css" rel="stylesheet">
   <link href="<?= BASE_URL ?>includes/jquery/owl-carousel/owl.carousel.css" type="text/css" rel="stylesheet" media="screen" />
-  <script src="<?= BASE_URL ?>javascript/jquery.extra.js" type="text/javascript"></script>
   <script src="<?= BASE_URL ?>includes/common.js" type="text/javascript"></script>
   <link href="<?= BASE_URL ?>images/favicon.png" rel="icon" />
   <script src="<?= BASE_URL ?>includes/jquery/owl-carousel/owl.carousel.min.js" type="text/javascript"></script>
@@ -63,7 +62,11 @@
               </span>
             </form>
             <div class="btn-group btn-block" id="cart">
-              <button class="btn btn-viewcart dropdown-toggle" data-loading-text="Loading..." data-toggle="dropdown" type="button" aria-expanded="false"><span class="lg">My Cart</span><span id="cart-total"><i class="fa fa-shopping-basket"></i> (1) items</span></button>
+              <?php
+              session_status()==1?session_start():'';
+              $cart=isset($_SESSION['cart'])?count($_SESSION['cart']):0;
+              ?>
+              <button class="btn btn-viewcart dropdown-toggle" data-loading-text="Loading..." data-toggle="dropdown" type="button" aria-expanded="false"><span class="lg">My Cart</span><span id="cart-total"><i class="fa fa-shopping-basket"></i> (<?=$cart?>) items</span></button>
               <ul class="dropdown-menu pull-right">
                 <?php include_once 'mini_cart.php'; ?>
               </ul>

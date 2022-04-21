@@ -2,10 +2,13 @@
 session_status() == 1 ? session_start() : '';
 require_once "./db/connect.php";
 require_once "./common/functions.php";
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id']) && isset($_POST['quantity'])) {
   update_cart($_POST['id'],$_POST['quantity']);
 }
-
+if(isset($_POST['coupon'])){
+  echo json_encode(validate_coupon($_POST['coupon'],$connect));
+  return 1;
+}
 
 $page_data = array();
 if (isset($_SESSION['cart']) && count($_SESSION['cart'])>0) {
@@ -509,19 +512,23 @@ include_once "./common/navbar.php";
               <tbody>
                 <tr>
                   <td class="text-right"><strong>Sub-Total:</strong></td>
-                  <td class="text-right">$<?=$subtotal?></td>
+                  <td class="text-right" >$<span id="subtotal"><?=$subtotal?></span></td>
+                </tr>
+                <tr id="discount_tr" style="display: none;">
+                  <td class="text-right"><strong>Discount:</strong></td>
+                  <td class="text-right" > - $<span id="discount"></span></td>
                 </tr>
                 <tr>
                   <td class="text-right"><strong>Eco Tax (-2.00):</strong></td>
-                  <td class="text-right">$<?=$ecotax?></td>
+                  <td class="text-right">$<span id="ecotax"><?=$ecotax?></span></td>
                 </tr>
                 <tr>
                   <td class="text-right"><strong>VAT (20%):</strong></td>
-                  <td class="text-right">$<?=$vat=$subtotal*20/100?></td>
+                  <td class="text-right">$<span id="vat"><?=$vat=$subtotal*20/100?></span></td>
                 </tr>
                 <tr>
                   <td class="text-right"><strong>Total:</strong></td>
-                  <td class="text-right">$<?=$subtotal+$vat+$ecotax?></td>
+                  <td class="text-right">$<span id="total"><?=$subtotal+$vat+$ecotax?></span></td>
                 </tr>
               </tbody>
             </table>
@@ -536,5 +543,44 @@ include_once "./common/navbar.php";
 
   </div>
 </div>
+<script>
+  $('#button-coupon').on('click',function(){
+    var coupon=$('#input-coupon').val();
+    if(coupon!=""){
+      var parameter={'coupon':coupon};
+      $.ajax({
+        url:'cart.php',
+        type:'post',
+        dataType:'json',
+        data:parameter,
+        success:function(data){
+          if(data.status){
+            var discount=Number(data.amount);
+            var subtotal=Number($('#subtotal').html());
+            if(data.type==2){
+              var discount_price=subtotal*discount/100;
+            }else{
+              var discount_price=discount;
+            }
+            var ecotax=Number($('#ecotax').html());
+            var vat=(subtotal-discount_price)*20/100;
+            var total=subtotal+ecotax+vat-discount_price;
+            $('#button-coupon').prop('disabled',true);
+            $('#discount').html(discount_price);
+            $('#discount_tr').show();
+            $('#vat').html(vat);
+            $('#total').html(total);
+          }
+        },
+        error:function(response){
+          console.log({'error':response})
+        }
+      })
+    }else{
+      $('#input-coupon').focus();
+      alert('please enter a code');
+    }
+  })
+</script>
 
 <?php include_once "./common/footer.php" ?>
