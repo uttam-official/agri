@@ -57,7 +57,7 @@
     // });
     /*** add active class and stay opened when selected ***/
     var url = window.location;
-    var server=window.location.origin;
+    var server = window.location.origin;
 
     // for sidebar menu entirely but not cover treeview
     $('ul.nav-sidebar a').filter(function() {
@@ -66,7 +66,7 @@
         }
     }).addClass('active');
     //Dashboard
-    window.location.href==`${server}/agri/admin/`?$('.dashboard').removeClass('bg-secondary').addClass('active'):$('.dashboard').removeClass('active').addClass('bg-secondary');
+    window.location.href == `${server}/agri/admin/` ? $('.dashboard').removeClass('bg-secondary').addClass('active') : $('.dashboard').removeClass('active').addClass('bg-secondary');
 
     // for the treeview
     $('ul.nav-treeview a').filter(function() {
@@ -74,6 +74,13 @@
             return this.href == url || url.href.indexOf(this.href) == 0;
         }
     }).parentsUntil(".nav-sidebar > .nav-treeview").addClass('menu-open').prev('a').addClass('active');
+</script>
+<script>
+    $(document).ready(function() {
+        $("body").tooltip({
+            selector: '[data-toggle=tooltip]'
+        });
+    });
 </script>
 </body>
 

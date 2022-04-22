@@ -43,7 +43,7 @@
         <ul class="list-inline">
           <li><a href="#"><i class="fa fa-user"></i> <span>My Account</span></a></li>
           <li><a href="#" id="wishlist-total" title="Wish List (0)"><i class="fa fa-heart"></i> <span>Wishlist (0)</span></a></li>
-          <li><a href="" title="Checkout"><i class="fa fa-shopping-bag"></i> <span>Checkout</span></a></li>
+          <li><a href="#" class="checkout_mini"><i class="fa fa-shopping-bag"></i> <span>Checkout</span></a></li>
         </ul>
       </div>
     </div>

@@ -3,7 +3,7 @@ session_status() == 1 ? session_start() : '';
 require_once "./db/connect.php";
 require_once "./common/functions.php";
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id']) && isset($_POST['quantity'])) {
-  update_cart($_POST['id'], $_POST['quantity']);
+  $checkout_upadte_alert= update_cart($_POST['id'], $_POST['quantity'])==0? 1:'';
 }
 if (isset($_POST['coupon'])) {
   echo json_encode(validate_coupon($_POST['coupon'], $connect));
@@ -29,6 +29,8 @@ if (isset($_SESSION['cart']) && count($_SESSION['cart']) > 0) {
 $title = "Shopping Cart";
 require_once  "./common/header.php";
 include_once "./common/navbar.php";
+echo isset($checkout_upadte_alert) && $checkout_upadte_alert==1 ? "<script>Swal.fire({icon:'warning',title:'Oops...',text:'Your cart changed ... Please recheckout !'});</script>":'';
+
 ?>
 
 
@@ -585,21 +587,14 @@ include_once "./common/navbar.php";
             var vat = (subtotal - discount_price) * 20 / 100;
             var total = subtotal + ecotax + vat - discount_price;
             $('#button-coupon').prop('disabled', true);
+            $('#input-coupon').prop('readonly', true);
             $('#discount').html(discount_price);
             $('#discount_tr').show();
             $('#vat').html(vat);
             $('#total').html(total);
-            $('#alert').hide();
-            $('#discount_alert').html('Discount coupon added successfully');
-            $('#alert').removeClass('alert-danger');
-            $('#alert').addClass('alert-success');
-            $('#alert').show();
+            Swal.fire({icon:'success',title:'Voila',text:`You get $${discount_price} off !`});
           } else {
-            $('#alert').hide();
-            $('#discount_alert').html('Enter a valid coupon code');
-            $('#alert').removeClass('alert-success');
-            $('#alert').addClass('alert-danger');
-            $('#alert').show();
+            Swal.fire({icon:'error',title:'Oops...',text:"Enter a valid Coupon code !"});
           }
         },
         error: function(response) {
@@ -610,7 +605,7 @@ include_once "./common/navbar.php";
       })
     } else {
       $('#input-coupon').focus();
-      Swal.fire('please enter a code');
+      Swal.fire({icon:'error',title:'Oops...',text:"Coupon code is just missing!"});
     }
   });
 
@@ -640,10 +635,12 @@ include_once "./common/navbar.php";
       data: parameter,
       dataType: 'json',
       success: function(data) {
-        console.log(data);
+        if(data.status){
+          window.location="login.php";
+        }
       },
       error: function(response) {
-        console.log(response);
+        console.log({'error':response});
       }
     });
   });

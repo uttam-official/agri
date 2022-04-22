@@ -12,7 +12,7 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a class="nav-link" href="<?=BASE_URL?>/components/logout.php">
+        <a class="nav-link" href="<?=BASE_URL?>/components/logout.php" data-toggle="tooltip" data-placement="left" title="Logout">
             <i class="fas fa-sign-out-alt"></i>
         </a>
       </li>

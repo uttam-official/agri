@@ -26,7 +26,7 @@ include_once "./common/navbar.php";
             <div class="well">
               <h4>NEW CUSTOMER</h4>
               <p>By creating an account you will be able to shop faster, be up to date on an order's status, and keep track of the orders you have previously made.</p>
-              <a class="btn btn-default btn-lg" href="#">Register</a>
+              <a class="btn btn-default btn-lg" href="<?=BASE_URL.'register.php'?>">Register</a>
             </div>
           </div>
           <div class="col-sm-8">

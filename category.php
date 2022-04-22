@@ -129,7 +129,6 @@ include_once "./common/navbar.php";
   var server = window.location.origin;
   var sidelink = document.querySelectorAll('.sidenav-link');
   var sublist = document.querySelectorAll('.sublist');
-  console.log(sidelink[0].href);
   sidelink.forEach((element, i) => {
     if (element.href == url || url.href.indexOf(element.href + '&sid=') == 0) {
       sublist[i].classList.remove('collapse');

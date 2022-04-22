@@ -40,10 +40,20 @@ if (isset($_SESSION['cart']) && count($_SESSION['cart'])>0) {
                 </tr>
                 <tr>
                     <td class="text-right"><strong>Total</strong></td>
-                    <td class="text-right">$<?=$subtotal+$ecotax+$vat?></td>
+                    <td class="text-right">$<span id="total_mini"><?=$subtotal+$ecotax+$vat?></span></td>
                 </tr>
             </tbody>
         </table>
-        <p class="text-right"><a href="<?= BASE_URL . 'cart.php' ?>"><strong><i class="fa fa-shopping-cart"></i> View Cart</strong></a>&nbsp;&nbsp;&nbsp;<a href="#"><strong><i class="fa fa-share"></i> Checkout</strong></a></p>
+        <p class="text-right"><a href="<?= BASE_URL . 'cart.php' ?>"><strong><i class="fa fa-shopping-cart"></i> View Cart</strong></a>&nbsp;&nbsp;&nbsp;<a href="#" class="checkout_mini"><strong><i class="fa fa-share"></i> Checkout</strong></a></p>
     </div>
 </li>
+
+<script>
+    $('.checkout_mini').on('click',function(){
+        if(Number($('#total_mini').html())<=0){
+            Swal.fire({icon:'error',title:'Oops...',text:'Your cart is empty !'});
+        }else{
+            window.location="checkout.php";
+        }
+    })
+</script>

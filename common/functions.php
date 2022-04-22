@@ -92,12 +92,22 @@ function add_to_cart($id,$qty,$connect){
 function update_cart($id,$qty){
 	session_status()==1?session_start():'';
 	$_SESSION['cart'][$id]['qty']=$qty;
+    if(isset($_SESSION['checkout'])){
+        unset($_SESSION['checkout']);
+        return 0;
+    }
+    return 1;
 }
 
 //PRODUCT REMOVE FROM CART
 function remove_cart($id){
 	session_status()==1?session_start():'';
 	unset($_SESSION['cart'][$id]);
+    if(isset($_SESSION['checkout'])){
+        unset($_SESSION['checkout']);
+        return 0;
+    }
+    return 1;
 }
 //VALIDATE COUPON
 function validate_coupon($coupon,$connect){
