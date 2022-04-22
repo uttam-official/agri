@@ -40,13 +40,13 @@ include_once './common/navbar.php';
   </div>
 </div>
 <div id="main-container">
-  <?= isset($status) && $status == 1 ? '<div class="alert alert-success alert-dismissible fade show" role="alert">
-            Product sucessfully added   !  
+  <div class="container">
+    <?= isset($status) && $status == 1 ? '<div class="alert alert-success alert-dismissible show " role="alert">
+            Product sucessfully added to cart &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="cart.php" class="text-danger"><u>Go to Cart</u>  !  
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+              <span aria-hidden="true">&times; &nbsp; &nbsp; </span>
             </button>
           </div>' : "" ?>
-  <div class="container">
 
     <div class="row">
       <div class="col-sm-12" id="content">

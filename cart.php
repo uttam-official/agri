@@ -3,15 +3,26 @@ session_status() == 1 ? session_start() : '';
 require_once "./db/connect.php";
 require_once "./common/functions.php";
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id']) && isset($_POST['quantity'])) {
-  update_cart($_POST['id'],$_POST['quantity']);
+  update_cart($_POST['id'], $_POST['quantity']);
 }
-if(isset($_POST['coupon'])){
-  echo json_encode(validate_coupon($_POST['coupon'],$connect));
+if (isset($_POST['coupon'])) {
+  echo json_encode(validate_coupon($_POST['coupon'], $connect));
   return 1;
 }
+if (isset($_POST['subtotal']) && isset($_POST['vat']) && isset($_POST['ecotax']) && isset($_POST['total'])) {
+  $data = array(
+    "subtotal" => $_POST['subtotal'],
+    "vat" => $_POST['vat'],
+    "ecotax" => $_POST['ecotax'],
+    "total" => $_POST['total']
+  );
+  $_SESSION['checkout'] = $data;
 
+  echo json_encode(['status' => true]);
+  return 1;
+}
 $page_data = array();
-if (isset($_SESSION['cart']) && count($_SESSION['cart'])>0) {
+if (isset($_SESSION['cart']) && count($_SESSION['cart']) > 0) {
   $page_data = $_SESSION['cart'];
 }
 
@@ -49,18 +60,21 @@ include_once "./common/navbar.php";
               </tr>
             </thead>
             <tbody>
-              <?php $subtotal=0;$ecotax=0; foreach ($page_data as $id => $value) : $ecotax+=2; $subtotal+=$value['qty'] * $value['price']; ?>
+              <?php $subtotal = 0;
+              $ecotax = 0;
+              foreach ($page_data as $id => $value) : $ecotax += 2;
+                $subtotal += $value['qty'] * $value['price']; ?>
                 <tr>
                   <td class="text-left"><a href="<?= BASE_URL . 'product.php?id=' . $id ?>"><img class="img-thumbnail" src="<?= BASE_URL . 'admin/dist/images/product/small/' . $id . '.' . $value['image_extension'] ?>" alt=""></a></td>
                   <td class="text-left"><a href="<?= BASE_URL . 'product.php?id=' . $id ?>"><?= $value['name'] ?></a></td>
                   <td class="text-left">€<?= $value['price'] ?></td>
                   <td class="text-left">
                     <form style="max-width: 200px;" class="input-group btn-block" action="" method="POST">
-                      <input type="hidden" name="id" value="<?=$id?>">
-                      <input type="number" min="1"  class="form-control" size="1" value="<?= $value['qty'] ?>" name="quantity" required>
+                      <input type="hidden" name="id" value="<?= $id ?>">
+                      <input type="number" min="1" class="form-control" size="1" value="<?= $value['qty'] ?>" name="quantity" required>
                       <span class="input-group-btn">
-                        <button class="btn btn-primary" data-toggle="tooltip" type="submit" ><i class="fa fa-refresh"></i></button>
-                        <a href="<?=BASE_URL.'remove_cart.php?remove='.$id.'&uri='.$_SERVER['REQUEST_URI']?>" class="btn btn-danger" data-toggle="tooltip"><i class="fa fa-times-circle"></i></a>
+                        <button class="btn btn-primary" data-toggle="tooltip" type="submit"><i class="fa fa-refresh"></i></button>
+                        <a href="<?= BASE_URL . 'remove_cart.php?remove=' . $id . '&uri=' . $_SERVER['REQUEST_URI'] ?>" class="btn btn-danger" data-toggle="tooltip"><i class="fa fa-times-circle"></i></a>
                       </span>
                     </form>
                   </td>
@@ -508,27 +522,30 @@ include_once "./common/navbar.php";
         <br>
         <div class="row">
           <div class="col-sm-4 col-sm-offset-8">
+            <div class="alert alert-success alert-dismissible" role="alert" id="alert" style="display:none;">
+              <span id="discount_alert"></span>
+            </div>
             <table class="table table-bordered">
               <tbody>
                 <tr>
                   <td class="text-right"><strong>Sub-Total:</strong></td>
-                  <td class="text-right" >$<span id="subtotal"><?=$subtotal?></span></td>
+                  <td class="text-right">$<span id="subtotal"><?= $subtotal ?></span></td>
                 </tr>
                 <tr id="discount_tr" style="display: none;">
                   <td class="text-right"><strong>Discount:</strong></td>
-                  <td class="text-right" > - $<span id="discount"></span></td>
+                  <td class="text-right"> - $<span id="discount">0</span></td>
                 </tr>
                 <tr>
                   <td class="text-right"><strong>Eco Tax (-2.00):</strong></td>
-                  <td class="text-right">$<span id="ecotax"><?=$ecotax?></span></td>
+                  <td class="text-right">$<span id="ecotax"><?= $ecotax ?></span></td>
                 </tr>
                 <tr>
                   <td class="text-right"><strong>VAT (20%):</strong></td>
-                  <td class="text-right">$<span id="vat"><?=$vat=$subtotal*20/100?></span></td>
+                  <td class="text-right">$<span id="vat"><?= $vat = $subtotal * 20 / 100 ?></span></td>
                 </tr>
                 <tr>
                   <td class="text-right"><strong>Total:</strong></td>
-                  <td class="text-right">$<span id="total"><?=$subtotal+$vat+$ecotax?></span></td>
+                  <td class="text-right">$<span id="total"><?= $subtotal + $vat + $ecotax ?></span></td>
                 </tr>
               </tbody>
             </table>
@@ -536,7 +553,7 @@ include_once "./common/navbar.php";
         </div>
         <div class="buttons cart-btngroup">
           <div class="pull-left"><a class="btn btn160 btn-lg btn-default" href="#">Continue Shopping</a></div>
-          <div class="pull-right"><a class="btn btn160 btn-lg btn-primary" href="#">Checkout</a></div>
+          <div class="pull-right"><button class="btn btn160 btn-lg btn-primary" id="checkout">Checkout</button></div>
         </div>
       </div>
     </div>
@@ -544,43 +561,92 @@ include_once "./common/navbar.php";
   </div>
 </div>
 <script>
-  $('#button-coupon').on('click',function(){
-    var coupon=$('#input-coupon').val();
-    if(coupon!=""){
-      var parameter={'coupon':coupon};
+  $('#button-coupon').on('click', function() {
+    var coupon = $('#input-coupon').val();
+    if (coupon != "") {
+      var parameter = {
+        'coupon': coupon
+      };
       $.ajax({
-        url:'cart.php',
-        type:'post',
-        dataType:'json',
-        data:parameter,
-        success:function(data){
-          if(data.status){
-            var discount=Number(data.amount);
-            var subtotal=Number($('#subtotal').html());
-            if(data.type==2){
-              var discount_price=subtotal*discount/100;
-            }else{
-              var discount_price=discount;
+        url: 'cart.php',
+        type: 'post',
+        dataType: 'json',
+        data: parameter,
+        success: function(data) {
+          if (data.status) {
+            var discount = Number(data.amount);
+            var subtotal = Number($('#subtotal').html());
+            if (data.type == 2) {
+              var discount_price = subtotal * discount / 100;
+            } else {
+              var discount_price = discount;
             }
-            var ecotax=Number($('#ecotax').html());
-            var vat=(subtotal-discount_price)*20/100;
-            var total=subtotal+ecotax+vat-discount_price;
-            $('#button-coupon').prop('disabled',true);
+            var ecotax = Number($('#ecotax').html());
+            var vat = (subtotal - discount_price) * 20 / 100;
+            var total = subtotal + ecotax + vat - discount_price;
+            $('#button-coupon').prop('disabled', true);
             $('#discount').html(discount_price);
             $('#discount_tr').show();
             $('#vat').html(vat);
             $('#total').html(total);
+            $('#alert').hide();
+            $('#discount_alert').html('Discount coupon added successfully');
+            $('#alert').removeClass('alert-danger');
+            $('#alert').addClass('alert-success');
+            $('#alert').show();
+          } else {
+            $('#alert').hide();
+            $('#discount_alert').html('Enter a valid coupon code');
+            $('#alert').removeClass('alert-success');
+            $('#alert').addClass('alert-danger');
+            $('#alert').show();
           }
         },
-        error:function(response){
-          console.log({'error':response})
+        error: function(response) {
+          console.log({
+            'error': response
+          })
         }
       })
-    }else{
+    } else {
       $('#input-coupon').focus();
-      alert('please enter a code');
+      Swal.fire('please enter a code');
     }
-  })
+  });
+
+
+  $('#checkout').on('click', function() {
+    var subtotal = Number($('#subtotal').html());
+    var vat = Number($('#vat').html());
+    var ecotax = Number($('#ecotax').html());
+    var total = Number($('#total').html());
+    if (total <= 0) {
+      Swal.fire({
+        icon:'error',
+        title:'Opps...',
+        text:'Your cart is empty'
+      });
+      return 1;
+    }
+    var parameter = {
+      subtotal,
+      vat,
+      ecotax,
+      total
+    };
+    $.ajax({
+      url: 'cart.php',
+      type: 'post',
+      data: parameter,
+      dataType: 'json',
+      success: function(data) {
+        console.log(data);
+      },
+      error: function(response) {
+        console.log(response);
+      }
+    });
+  });
 </script>
 
 <?php include_once "./common/footer.php" ?>

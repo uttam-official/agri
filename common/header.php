@@ -26,6 +26,7 @@
   <link href="<?= BASE_URL ?>images/favicon.png" rel="icon" />
   <script src="<?= BASE_URL ?>includes/jquery/owl-carousel/owl.carousel.min.js" type="text/javascript"></script>
   <script src="<?= BASE_URL ?>includes/jquery/elevatezoom/jquery.elevatezoom.js" type="text/javascript"></script>
+  <script src="<?= BASE_URL ?>includes/jquery/sweetalert/sweetalert2.all.min.js" type="text/javascript"></script>
 </head>
 
 <body class="common-home">

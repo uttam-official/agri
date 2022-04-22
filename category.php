@@ -96,7 +96,7 @@ include_once "./common/navbar.php";
                     </div>
                   </a>
                   <div class="caption">
-                    <h4><a href="><?= BASE_URL . 'product.php?id=' . $l->id ?>"><?= $l->name ?></a></h4>
+                    <h4><a href="<?= BASE_URL . 'product.php?id=' . $l->id ?>"><?= $l->name ?></a></h4>
                     <div class="rating">
                       <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
                       <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>

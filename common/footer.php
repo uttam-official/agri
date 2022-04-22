@@ -5,7 +5,7 @@
         <aside class="widget">
           <h4>Navigation</h4>
           <ul class="list-unstyled">
-            <li><a href="#">Home</a></li>
+            <li><a href="<?=BASE_URL?>">Home</a></li>
             <?php foreach (get_category($connect) as $l) : ?>
               <li><a href="<?= BASE_URL . 'category.php?cid=' . $l->id ?>"><?= $l->name ?></a></li>
             <?php endforeach; ?>
