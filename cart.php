@@ -12,6 +12,7 @@ if (isset($_POST['coupon'])) {
 if (isset($_POST['subtotal']) && isset($_POST['vat']) && isset($_POST['ecotax']) && isset($_POST['total'])) {
   $data = array(
     "subtotal" => $_POST['subtotal'],
+    "discount"=>$_POST['discount'],
     "vat" => $_POST['vat'],
     "ecotax" => $_POST['ecotax'],
     "total" => $_POST['total']
@@ -609,12 +610,12 @@ echo isset($checkout_upadte_alert) && $checkout_upadte_alert==1 ? "<script>Swal.
     }
   });
 
-
   $('#checkout').on('click', function() {
     var subtotal = Number($('#subtotal').html());
     var vat = Number($('#vat').html());
     var ecotax = Number($('#ecotax').html());
     var total = Number($('#total').html());
+    var discount = Number($('#discount').html());
     if (total <= 0) {
       Swal.fire({
         icon:'error',
@@ -625,6 +626,7 @@ echo isset($checkout_upadte_alert) && $checkout_upadte_alert==1 ? "<script>Swal.
     }
     var parameter = {
       subtotal,
+      discount,
       vat,
       ecotax,
       total

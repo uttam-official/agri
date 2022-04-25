@@ -11,6 +11,7 @@ if (isset($_SESSION['cart'])  && count($_SESSION['cart']) > 0) {
     $total = $subtotal + $ecotax + $vat;
     $_SESSION['checkout'] = array(
         "subtotal" => $subtotal,
+        "discount"=>0,
         "vat" => $vat,
         "ecotax" => $ecotax,
         "total" => $total

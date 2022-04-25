@@ -1,38 +1,40 @@
 <?php
-require_once './db/connect.php';
 require_once './common/functions.php';
+is_logged();
+require_once './db/connect.php';
 $status = 0;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   // var_dump($_POST);exit;
-  $q = $connect->prepare("SELECT id from customer where email=:email");
+  $q = $connect->prepare("SELECT id FROM customer WHERE email=:email");
   $q->execute([':email' => $_POST['email']]);
   if ($q->rowCount() > 0) {
     $status = 1;
-  }else{
-    $q1=$connect->prepare("INSERT INTO customer (firstname,lastname,email,phone,fax,password,newsletter) VALUES (?,?,?,?,?,?,?)");
-    $q1->bindValue(1,$_POST['firstname']);
-    $q1->bindValue(2,$_POST['lastname']);
-    $q1->bindValue(3,$_POST['email']);
-    $q1->bindValue(4,$_POST['phone']);
-    $q1->bindValue(5,$_POST['fax']);
-    $q1->bindValue(6,password_hash($_POST['password'],PASSWORD_BCRYPT));
-    $q1->bindValue(7,$_POST['newsletter']);
-    if($q1->execute()){
-      $customer_id=$connect->lastInsertId();
-      $q2=$connect->prepare('Insert into address (customer_id,company,address1,address2,city,postcode,country,state) values (?,?,?,?,?,?,?,?) ');
-      $q2->bindValue(1,$customer_id);
-      $q2->bindValue(2,$_POST['company']);
-      $q2->bindValue(3,$_POST['address_1']);
-      $q2->bindValue(4,$_POST['address_2']);
-      $q2->bindValue(5,$_POST['city']);
-      $q2->bindValue(6,$_POST['postcode']);
-      $q2->bindValue(7,$_POST['country']);
-      $q2->bindValue(8,$_POST['state']);
-      if($q2->execute()){
-        header('location:login.php');
+  } else {
+    $q1 = $connect->prepare("INSERT INTO customer (firstname,lastname,email,phone,fax,password,newsletter) VALUES (?,?,?,?,?,?,?)");
+    $q1->bindValue(1, $_POST['firstname']);
+    $q1->bindValue(2, $_POST['lastname']);
+    $q1->bindValue(3, $_POST['email']);
+    $q1->bindValue(4, $_POST['phone']);
+    $q1->bindValue(5, $_POST['fax']);
+    $q1->bindValue(6, password_hash($_POST['password'], PASSWORD_BCRYPT));
+    $q1->bindValue(7, $_POST['newsletter']);
+    if ($q1->execute()) {
+      $customer_id = $connect->lastInsertId();
+      $q2 = $connect->prepare('INSERT INTO address (customer_id,company,address1,address2,city,postcode,country,state) VALUES (?,?,?,?,?,?,?,?) ');
+      $q2->bindValue(1, $customer_id);
+      $q2->bindValue(2, $_POST['company']);
+      $q2->bindValue(3, $_POST['address_1']);
+      $q2->bindValue(4, $_POST['address_2']);
+      $q2->bindValue(5, $_POST['city']);
+      $q2->bindValue(6, $_POST['postcode']);
+      $q2->bindValue(7, $_POST['country']);
+      $q2->bindValue(8, $_POST['state']);
+      if ($q2->execute()) {
+        $status = 2;
+      } else {
+        $status = 3;
       }
     }
-    
   }
 }
 
@@ -44,6 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 $title = "User Registration";
 require_once './common/header.php';
+
+if ($status == 2) {
+  echo "<script>Swal.fire({icon:'success',title:'Voila..',text:'Registration Successful'}).then(function(){window.location='login.php'})</script>";
+}
+
+
+
 include_once './common/navbar.php';
 ?>
 
@@ -62,8 +71,14 @@ include_once './common/navbar.php';
 </div>
 <div id="main-container">
   <div class="container">
-    <?= $status ? '<div class="alert alert-warning alert-dismissible show " role="alert">
-            Email already in use...Please enter another email &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="cart.php" class="text-danger"><u>Go to Cart</u>  !  
+    <?= $status == 1 ? '<div class="alert alert-warning alert-dismissible show " role="alert">
+            Email already in use...Please enter another email   
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times; &nbsp; &nbsp; </span>
+            </button>
+          </div>' : "" ?>
+    <?= $status == 3 ? '<div class="alert alert-danger alert-dismissible show " role="alert">
+            Ohh... Too many presure... Try after some time  !  
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times; &nbsp; &nbsp; </span>
             </button>
@@ -415,12 +430,14 @@ include_once './common/navbar.php';
               <div class="col-sm-7">
                 <select class="form-control" id="input-zone" name="state" required>
                   <option value=""> --- Please Select --- </option>
-                  <option value="Kolkata">Kolkata</option>
+                  <option value="West Bengal">West Bengal</option>
                   <option value="Delhi">Delhi</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Pune">Pune</option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="Bengalore">Bengalore</option>
+                  <option value="Maharastra">Maharastra</option>
+                  <option value="Tamilnadu">Tamilnadu</option>
+                  <option value="Bihar">Bihar</option>
+                  <option value="Jharkhand">Jharkhand</option>
+                  <option value="UP">UP</option>
+                  <option value="HP">HP</option>
                   <!-- <option value="3513">Aberdeen</option>
                   <option value="3514">Aberdeenshire</option>
                   <option value="3515">Anglesey</option>

@@ -48,7 +48,7 @@
   </div>
 </div>
 
-</body>
+
 <script>
   /*** add active class and stay opened when selected ***/
   var url = window.location;
@@ -63,5 +63,5 @@
   //Dashboard
   window.location.href == `${server}/agri/` ? $('.home').addClass('active') : $('.home').removeClass('active');
 </script>
-
+</body>
 </html>
