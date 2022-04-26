@@ -31,6 +31,8 @@
 <script src="<?= BASE_URL ?>/plugins/summernote/summernote-bs4.min.js"></script>
 <!-- overlayScrollbars -->
 <script src="<?= BASE_URL ?>/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+<!-- sweetalert -->
+<script src="<?= BASE_URL ?>/plugins/sweetalert2/sweetalert2.all.min.js"></script>
 <!-- AdminLTE App -->
 <script src="<?= BASE_URL ?>/dist/js/adminlte.js"></script>
 <!-- AdminLTE for demo purposes -->

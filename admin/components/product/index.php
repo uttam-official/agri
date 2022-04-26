@@ -85,7 +85,7 @@ include_once "../../includes/sidebar.php";
                                 New</a>
                         </div>
                         <div class="row mt-4">
-                            <table class="table-sm table-bordered col-md-11 mx-auto rounded">
+                            <table class="table-sm table-bordered table-striped table-hover col-md-11 mx-auto rounded">
                                 <thead>
                                     <tr class="text-center table-secondary">
                                         <th>#</th>
