@@ -39,6 +39,7 @@ include_once "../../includes/sidebar.php";
     <section class="content">
         <div class="container-fluid">
             <?= show_flash('customer_warning') ?>
+            <?= show_flash('customer_success') ?>
             <!-- general form elements -->
             <div class="card card-outline card-info">
                 <div class="card-body">

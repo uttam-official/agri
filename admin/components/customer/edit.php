@@ -130,8 +130,8 @@ include_once "../../includes/sidebar.php";
                             <div class="col-md-6">
                                 <label>Status</label>
                                 <select name="isactive" class="form-control">
-                                    <option value="1" <?= $customer->isactive ? "required" : '' ?>>Active</option>
-                                    <option value="0" <?= $customer->isactive ? "" : 'required' ?>>Inactive</option>
+                                    <option value="1" <?= $customer->isactive ? "selected" : '' ?>>Active</option>
+                                    <option value="0" <?= $customer->isactive ? "" : 'selected' ?>>Inactive</option>
                                 </select>
                             </div>
                             <div class="col-md-12 mt-3 text-center">
