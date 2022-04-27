@@ -5,12 +5,14 @@ require_once "./db/connect.php";
 session_status() == 1 ? session_start() : '';
 $status = 0;
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-  $q = $connect->prepare('SELECT id,password FROM customer WHERE email=:email AND isactive=:active');
+  $q = $connect->prepare('SELECT id,firstname,lastname,email,password FROM customer WHERE email=:email AND isactive=:active');
   $q->execute([':email' => $_POST['email'], ':active' => 1]);
   if ($q->rowCount() == 1) {
     $customer = $q->fetch(PDO::FETCH_OBJ);
     if (password_verify($_POST['password'], $customer->password)) {
       $_SESSION['user_id'] = $customer->id;
+      $_SESSION['user_mail'] = $customer->email;
+      $_SESSION['user_name'] = $customer->firstname.' '.$customer->lastname;
       $status = 1;
     } else {
       $status=2;

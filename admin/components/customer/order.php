@@ -158,7 +158,7 @@ include_once "../../includes/sidebar.php";
                                     <input type="text" class="form-control form-control-sm" value="<?= date("d-m-Y", strtotime($l->created)) ?>" readonly>
                                 </div>
                                 <div class="col-md-12 text-center mt-3">
-                                    <a href="<?=BASE_URL?>/components/order/edit.php"id="e<?=$l->id?>"class="btn btn-sm btn-info <?=$l->order_status<0?'disabled':''?>"><i class="fa fa-edit"> Edit</i></a>&nbsp;&nbsp;
+                                    <a href="<?=BASE_URL?>/components/order/edit.php?id=<?=$l->id?>"id="e<?=$l->id?>"class="btn btn-sm btn-info <?=$l->order_status<0?'disabled':''?>"><i class="fa fa-edit"> Edit</i></a>&nbsp;&nbsp;
                                     <button data-name="<?=$l->id?>" class="btn btn-sm btn-danger cancel " type="button" <?=$l->order_status<0?'disabled':''?>><i class="fa fa-times"> Cancel</i></button>
                                 </div>
                             </div>

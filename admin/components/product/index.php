@@ -110,8 +110,8 @@ include_once "../../includes/sidebar.php";
                                                 <td><?= $value->price ?></td>
                                                 <td><?= $value->availability == 1 ? '<span class="badge badge-info">In Stock</span>' : '<span class="badge badge-warning">Out of Stock</span>' ?></td>
                                                 <td>
-                                                    <a href="<?= BASE_URL ?>/components/product/add.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
-                                                    <a href="<?= BASE_URL ?>/components/product/delete.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i></a>
+                                                    <a href="<?= BASE_URL ?>/components/product/add.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-info" data-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
+                                                    <a href="<?= BASE_URL ?>/components/product/delete.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-danger" data-toggle="tooltip" title="Delete"> <i class="fa fa-trash"></i></a>
                                                 </td>
                                             </tr>
                                         <?php endforeach;

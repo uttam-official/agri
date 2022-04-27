@@ -109,8 +109,8 @@ include_once "../../includes/sidebar.php";
                                                 <td class="text-left"><?= $value->parent ?></td>
                                                 <td><?= $value->isactive ? '<span class="badge badge-primary">Active</span>' : '<span class="badge badge-secondary">Inactive</span>'; ?></td>
                                                 <td>
-                                                    <a href="<?= BASE_URL ?>/components/subcategory/add.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-info"><i class="fa fa-edit"></i></a>
-                                                    <a href="<?= BASE_URL ?>/components/subcategory/delete.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i></a>
+                                                    <a href="<?= BASE_URL ?>/components/subcategory/add.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-info" data-toggle="tooltip" title="Edit"><i class="fa fa-edit"></i></a>
+                                                    <a href="<?= BASE_URL ?>/components/subcategory/delete.php?id=<?= $value->id ?>" class="btn btn-sm btn-outline-danger" data-toggle="tooltip" title="Delete"> <i class="fa fa-trash"></i></a>
                                                 </td>
                                             </tr>
                                         <?php endforeach;

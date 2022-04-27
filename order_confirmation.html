@@ -1,233 +1,4 @@
-<?php
-//GET CATEGORY
-function get_category($connect)
-{
-    $q = $connect->prepare("SELECT id,name,extension FROM category  WHERE isactive=:isactive and parent=:parent ORDER BY categoryorder");
-    $q->execute([':isactive' => 1, ':parent' => 0]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-//GET SUBCATEGORY
-function get_subcategory($parent, $connect)
-{
-    $q = $connect->prepare("SELECT id,name FROM category  WHERE isactive=:isactive and parent=:parent ORDER BY categoryorder");
-    $q->execute([':isactive' => 1, ':parent' => $parent]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-//GET RANDOM SPECIAL PRODUCT
-function get_random_special_product($connect)
-{
-    $q = $connect->prepare("SELECT id,name,price,image_extension FROM product WHERE isactive=:isactive AND special=:special ORDER BY RAND()");
-    $q->execute([':isactive' => 1, ':special' => 1]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-//GET RANDOM FEATURED PRODUCT
-function get_random_featured_product($connect)
-{
-    $q = $connect->prepare("SELECT id,name,price,image_extension FROM product WHERE isactive=:isactive AND featured=:featured ORDER BY RAND()");
-    $q->execute([':isactive' => 1, ':featured' => 1]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-//GET SINGLE PRODUCT DETAILS
-function get_single_product($id, $connect)
-{
-    $q = $connect->prepare('SELECT p.id,p.name,p.description,p.category,p.subcategory,c.name AS category_name,s.name AS subcategory_name,p.price,p.image_extension,p.availability,GROUP_CONCAT(g.extension) AS gallery FROM product p JOIN category c ON p.category=c.id AND c.isactive=:c_active JOIN category s ON p.subcategory=s.id AND s.isactive=:s_active LEFT JOIN productgallery g ON g.product_id=p.id AND g.isactive=:g_active WHERE p.id=:id AND p.isactive=:p_active');
-    $q->execute([':c_active' => 1, ':s_active' => 1, ':g_active' => 1, ':id' => $id, ':p_active' => 1]);
-    return $q->fetch(PDO::FETCH_OBJ);
-}
-
-//GET RELATED PRODUCTS
-function get_related_product($id, $connect)
-{
-    $q = $connect->prepare('SELECT p.id,p.name,p.price,p.image_extension FROM product p JOIN product sp ON p.category=sp.category AND sp.id=:id WHERE p.isactive=:isactive AND p.id!=:p_id ORDER BY RAND()');
-    $q->execute([':id' => $id, ':isactive' => 1, ':p_id' => $id]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-
-// GET PRODUCT BY CATEGORY
-function get_product_by_category($category, $connect)
-{
-    $q = $connect->prepare('SELECT id,name,price,image_extension FROM product WHERE category=:category AND isactive=:isactive ORDER BY created');
-    $q->execute([':category' => $category, ':isactive' => 1]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-
-// GET PRODUCT BY CATEGORY AND SUBCATEGORY
-function get_product_by_subcategory($category, $subcategory, $connect)
-{
-    $q = $connect->prepare('SELECT id,name,price,image_extension FROM product WHERE category=:category AND subcategory=:subcategory AND isactive=:isactive ORDER BY created');
-    $q->execute([':category' => $category, ':subcategory' => $subcategory, ':isactive' => 1]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-
-// GET PRODUCT BY CATEGORY
-function get_product_by_search($key, $connect)
-{
-    $q = $connect->prepare('SELECT id,name,price,image_extension FROM product WHERE name LIKE :name AND isactive=:isactive ORDER BY name');
-    $q->execute([':name' => '%' . $key . '%', ':isactive' => 1]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-
-//PRODUCT ADD TO CART
-function add_to_cart($id, $qty, $connect)
-{
-    $q = $connect->prepare("SELECT id,name,image_extension,price FROM product WHERE id=:id");
-    $q->execute([':id' => $id]);
-    $product = $q->fetch(PDO::FETCH_ASSOC);
-    $product['qty'] = (int) $qty;
-    // var_dump($data[$id]['qty']);exit;
-    session_status() == 1 ? session_start() : '';
-    if (isset($_SESSION['cart']) && count($_SESSION['cart']) > 0) {
-        if (isset($_SESSION['cart'][$id])) {
-            $product['qty'] = $_SESSION['cart'][$id]['qty'] + $product['qty'];
-            $_SESSION['cart'][$id] = $product;
-        } else {
-            $_SESSION['cart'][$id] = $product;
-        }
-    } else {
-        $_SESSION['cart'] = array();
-        $_SESSION['cart'][$id] = $product;
-    }
-    // unset($_SESSION['cart'][3]);
-    // var_dump($_SESSION['cart'][2]['qty']);exit;
-    return 1;
-}
-//UPDATE CART QUANTITY
-function update_cart($id, $qty)
-{
-    session_status() == 1 ? session_start() : '';
-    $_SESSION['cart'][$id]['qty'] = $qty;
-    if (isset($_SESSION['checkout'])) {
-        unset($_SESSION['checkout']);
-        return 0;
-    }
-    return 1;
-}
-
-//PRODUCT REMOVE FROM CART
-function remove_cart($id)
-{
-    session_status() == 1 ? session_start() : '';
-    unset($_SESSION['cart'][$id]);
-    if (isset($_SESSION['checkout'])) {
-        unset($_SESSION['checkout']);
-        return 0;
-    }
-    return 1;
-}
-//VALIDATE COUPON
-function validate_coupon($coupon, $connect)
-{
-    $q = $connect->prepare('SELECT validfrom,validtill,amount,type FROM discount WHERE name=:name AND isactive=:isactive');
-    $q->execute([':name' => $coupon, ':isactive' => 1]);
-    if ($q->rowCount() > 0) {
-        $data = $q->fetch(PDO::FETCH_OBJ);
-        $validfrom = $data->validfrom;
-        $validtill = $data->validtill;
-        $stat1 = $validfrom != null ? (date('Y-m-d', strtotime($validfrom)) <= date('Y-m-d') ? 1 : 0) : 1;
-        $stat2 = $validtill != null ? (date('Y-m-d', strtotime($validtill)) >= date('Y-m-d') ? 1 : 0) : 1;
-        if ($stat1 && $stat2) {
-            return ['status' => true, 'amount' => $data->amount, 'type' => $data->type];
-        } else {
-            return ['status' => false];
-        }
-    } else {
-        return ['status' => false];
-    }
-}
-//CHECK LOGIN
-function verify_login()
-{
-    session_status() ? session_start() : '';
-    !isset($_SESSION['user_id']) ? header('location:login.php') : '';
-}
-//CHECK ALREADY LOGGED IN
-function is_logged()
-{
-    session_status() ? session_start() : '';
-    isset($_SESSION['user_id']) ? header('location:address.php?addr=1') : '';
-}
-//GET CUSTOMER ADDRESSES
-function get_customer_address($customer_id, $connect)
-{
-    $q = $connect->prepare("SELECT * FROM address WHERE customer_id=:id AND isactive=:active");
-    $q->execute([':id' => $customer_id, ':active' => 1]);
-    return $q->fetchAll(PDO::FETCH_OBJ);
-}
-
-//ADD CUSTOMER ADDRESS
-function add_customer_address($address, $customer_id, $url, $connect)
-{
-    $q2 = $connect->prepare('INSERT INTO address (customer_id,company,address1,address2,city,postcode,country,state) VALUES (?,?,?,?,?,?,?,?) ');
-    $q2->bindValue(1, $customer_id);
-    $q2->bindValue(2, $address['company']);
-    $q2->bindValue(3, $address['address_1']);
-    $q2->bindValue(4, $address['address_2']);
-    $q2->bindValue(5, $address['city']);
-    $q2->bindValue(6, $address['postcode']);
-    $q2->bindValue(7, $address['country']);
-    $q2->bindValue(8, $address['state']);
-    if ($q2->execute()) {
-        header('location:' . $url);
-    }
-}
-
-//PLACE ORDER
-
-function confirm_order($connect)
-{
-    session_status() == 1 ? session_start() : '';
-    $q = $connect->prepare("INSERT INTO ordersummery (customer_id,billing_id,shipping_id,subtotal,discount,ecotax,vat,total,payment) VALUES(?,?,?,?,?,?,?,?,?)");
-    $q->bindValue(1, $_SESSION['user_id']);
-    $q->bindValue(2, $_SESSION['billing_address']);
-    $q->bindValue(3, $_SESSION['shipping_address']);
-    $q->bindValue(4, $_SESSION['checkout']['subtotal']);
-    $q->bindValue(5, $_SESSION['checkout']['discount']);
-    $q->bindValue(6, $_SESSION['checkout']['ecotax']);
-    $q->bindValue(7, $_SESSION['checkout']['vat']);
-    $q->bindValue(8, $_SESSION['checkout']['total']);
-    $q->bindValue(9, $_SESSION['payment']);
-    if ($q->execute()) {
-        $order_id = $connect->lastInsertId();
-        $sql = "INSERT INTO orderinfo (ordersummery_id,product_id,product_price,quantity) VALUES (?,?,?,?)";
-        foreach ($_SESSION['cart'] as $l) {
-            $q1 = $connect->prepare($sql);
-            $q1->bindValue(1, $order_id);
-            $q1->bindValue(2, $l['id']);
-            $q1->bindValue(3, $l['price']);
-            $q1->bindValue(4, $l['qty']);
-            $q1->execute();
-        }
-
-        $htmlMsg = get_email_template($order_id,$connect);
-
-        unset($_SESSION['checkout']);
-        unset($_SESSION['cart']);
-        $_SESSION['success_order_id'] = $order_id;
-        $mail_id =$_SESSION['user_mail'];
-        $fromName='Agri Express';
-        $from='order@agriexpress.com';
-        $subject = 'Order Confirmation #' . $order_id;
-        //$htmlMsg="Your order successfully placed <br> order id #".$order_id;
-        
-        // Set content-type header for sending HTML email 
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-
-        // Additional headers 
-        $headers .= 'From: ' . $fromName . '<' . $from . '>' . "\r\n";
-        mail($mail_id, $subject, $htmlMsg, $headers);
-
-
-        header('location:order_success.php');
-    }
-}
-
-
-//GET EMAIL TEMPLATE
-function get_email_template($order_id,$connect){
- session_status()?session_start():'';
- $template='
- <!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -398,7 +169,7 @@ function get_email_template($order_id,$connect){
               <tbody>
                 <tr>
                   <td class="o_bg-white o_px-md o_py o_sans o_text o_text-secondary" align="center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;background-color: #ffffff;color: #424651;padding-left: 24px;padding-right: 24px;padding-top: 16px;padding-bottom: 16px;">
-                    <h4 class="o_heading o_text-dark o_mb-xs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 8px;color: #242b3d;font-size: 18px;line-height: 23px;">Hello, '.$_SESSION['user_name'].'</h4>
+                    <h4 class="o_heading o_text-dark o_mb-xs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 8px;color: #242b3d;font-size: 18px;line-height: 23px;">Hello, Clara Palmer</h4>
                     <p class="o_mb-md" style="margin-top: 0px;margin-bottom: 24px;">Thank you for ordering from Agri Express. You can track your shipment status using our mobile tracking. See your order confirmation below.</p>
                     <table align="center" cellspacing="0" cellpadding="0" border="0" role="presentation">
                       <tbody>
@@ -410,7 +181,7 @@ function get_email_template($order_id,$connect){
                       </tbody>
                     </table>
                     <div style="font-size: 28px; line-height: 28px; height: 28px;">&nbsp; </div>
-                    <h4 class="o_heading o_text-dark o_mb-xxs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 4px;color: #242b3d;font-size: 18px;line-height: 23px;">Order #'.$order_id.'</h4>
+                    <h4 class="o_heading o_text-dark o_mb-xxs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 4px;color: #242b3d;font-size: 18px;line-height: 23px;">Order #2541</h4>
                     <p class="o_text-xs o_text-light" style="font-size: 14px;line-height: 21px;color: #82899a;margin-top: 0px;margin-bottom: 0px;">Placed on March 14, 2018 1:20:32 PM FET</p>
                   </td>
                 </tr>
@@ -440,11 +211,12 @@ function get_email_template($order_id,$connect){
                             <tr>
                               <td class="o_bg-ultra_light o_br o_px o_py o_sans o_text-xs o_text-secondary" align="left" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 14px;line-height: 21px;background-color: #ebf5fa;color: #424651;border-radius: 4px;padding-left: 16px;padding-right: 16px;padding-top: 16px;padding-bottom: 16px;">
                                 <p class="o_mb-xs" style="margin-top: 0px;margin-bottom: 8px;"><strong>Billing Information</strong></p>
-                                <p class="o_mb-md" style="margin-top: 0px;margin-bottom: 24px;">'.$_SESSION['user_name'].'<br>
-                                    '.get_single_address($_SESSION['billing_address'],$connect).'  
-                                </p>
+                                <p class="o_mb-md" style="margin-top: 0px;margin-bottom: 24px;">Clara Palmer<br>
+                                  3333 Poplar Street<br>
+                                  Chicago, IL 60603<br>
+                                  United States</p>
                                 <p class="o_mb-xs" style="margin-top: 0px;margin-bottom: 8px;"><strong>Payment Method</strong></p>
-                                <p style="margin-top: 0px;margin-bottom: 0px;">Cash on Delivery</p>
+                                <p style="margin-top: 0px;margin-bottom: 0px;">Check / money order</p>
                               </td>
                             </tr>
                           </tbody>
@@ -460,9 +232,10 @@ function get_email_template($order_id,$connect){
                             <tr>
                               <td class="o_bg-ultra_light o_br o_px o_py o_sans o_text-xs o_text-secondary" align="left" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 14px;line-height: 21px;background-color: #ebf5fa;color: #424651;border-radius: 4px;padding-left: 16px;padding-right: 16px;padding-top: 16px;padding-bottom: 16px;">
                                 <p class="o_mb-xs" style="margin-top: 0px;margin-bottom: 8px;"><strong>Shipping Information</strong></p>
-                                <p class="o_mb-md" style="margin-top: 0px;margin-bottom: 24px;">'.$_SESSION['user_name'].'<br>
-                                '.get_single_address($_SESSION['billing_address'],$connect).'
-                                </p>
+                                <p class="o_mb-md" style="margin-top: 0px;margin-bottom: 24px;">Clara Palmer<br>
+                                  3333 Poplar Street<br>
+                                  Chicago, IL 60603<br>
+                                  United States</p>
                                 <p class="o_mb-xs" style="margin-top: 0px;margin-bottom: 8px;"><strong>Shipping Method</strong></p>
                                 <p style="margin-top: 0px;margin-bottom: 0px;">FedEx</p>
                               </td>
@@ -509,11 +282,170 @@ function get_email_template($order_id,$connect){
       </tbody>
     </table>
     <!-- product -->
-    
-    '.get_cart_product().'
-    
-    
-    <!-- end product -->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
+      <tbody>
+        <tr>
+          <td class="o_bg-light o_px-xs" align="center" style="background-color: #dbe5ea;padding-left: 8px;padding-right: 8px;">
+            <!--[if mso]><table width="632" cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td><![endif]-->
+            <table class="o_block" width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation" style="max-width: 632px;margin: 0 auto;">
+              <tbody>
+                <tr>
+                  <td class="o_re o_bg-white o_px o_pt" align="center" style="font-size: 0;vertical-align: top;background-color: #ffffff;padding-left: 16px;padding-right: 16px;padding-top: 16px;">
+                    <!--[if mso]><table cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td width="200" align="center" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-2 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 200px;">
+                      <div class="o_px-xs o_sans o_text o_center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;text-align: center;padding-left: 8px;padding-right: 8px;">
+                        <p style="margin-top: 0px;margin-bottom: 0px;"><a class="o_text-primary" href="#" style="text-decoration: none;outline: none;color: #126de5;"><img src="images/thumb_184.jpg" width="184" height="184" alt="" style="max-width: 184px;-ms-interpolation-mode: bicubic;vertical-align: middle;border: 0;line-height: 100%;height: auto;outline: none;text-decoration: none;"></a></p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td><td width="300" align="left" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-3 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 300px;">
+                      <div style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
+                      <div class="o_px-xs o_sans o_text o_text-light o_left o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #82899a;text-align: left;padding-left: 8px;padding-right: 8px;">
+                        <h4 class="o_heading o_text-dark o_mb-xxs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 4px;color: #242b3d;font-size: 18px;line-height: 23px;">Awesome Product Title</h4>
+                        <p class="o_text-secondary o_mb-xs" style="color: #424651;margin-top: 0px;margin-bottom: 8px;">Stingy yikes enchantingly rebuilt</p>
+                        <p class="o_text-xs o_mb-xs" style="font-size: 14px;line-height: 21px;margin-top: 0px;margin-bottom: 8px;">
+                          Color: Black<br>
+                          Size: M
+                        </p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td><td width="100" align="right" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-1 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 100px;">
+                      <div class="o_hide-xs" style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
+                      <div class="o_px-xs o_sans o_text o_text-secondary o_right o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;text-align: right;padding-left: 8px;padding-right: 8px;">
+                        <p style="margin-top: 0px;margin-bottom: 0px;">$900</p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td></tr><tr><td colspan="3" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_px-xs" style="padding-left: 8px;padding-right: 8px;">
+                      <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
+                        <tbody>
+                          <tr>
+                            <td class="o_re o_bb-light" style="font-size: 16px;line-height: 16px;height: 16px;vertical-align: top;border-bottom: 1px solid #d3dce0;">&nbsp; </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <!--[if mso]></td></tr></table><![endif]-->
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!--[if mso]></td></tr></table><![endif]-->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- product -->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
+      <tbody>
+        <tr>
+          <td class="o_bg-light o_px-xs" align="center" style="background-color: #dbe5ea;padding-left: 8px;padding-right: 8px;">
+            <!--[if mso]><table width="632" cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td><![endif]-->
+            <table class="o_block" width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation" style="max-width: 632px;margin: 0 auto;">
+              <tbody>
+                <tr>
+                  <td class="o_re o_bg-white o_px o_pt" align="center" style="font-size: 0;vertical-align: top;background-color: #ffffff;padding-left: 16px;padding-right: 16px;padding-top: 16px;">
+                    <!--[if mso]><table cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td width="200" align="center" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-2 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 200px;">
+                      <div class="o_px-xs o_sans o_text o_center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;text-align: center;padding-left: 8px;padding-right: 8px;">
+                        <p style="margin-top: 0px;margin-bottom: 0px;"><a class="o_text-primary" href="#" style="text-decoration: none;outline: none;color: #126de5;"><img src="images/thumb_184.jpg" width="184" height="184" alt="" style="max-width: 184px;-ms-interpolation-mode: bicubic;vertical-align: middle;border: 0;line-height: 100%;height: auto;outline: none;text-decoration: none;"></a></p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td><td width="300" align="left" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-3 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 300px;">
+                      <div style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
+                      <div class="o_px-xs o_sans o_text o_text-light o_left o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #82899a;text-align: left;padding-left: 8px;padding-right: 8px;">
+                        <h4 class="o_heading o_text-dark o_mb-xxs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 4px;color: #242b3d;font-size: 18px;line-height: 23px;">Awesome Product Title</h4>
+                        <p class="o_text-secondary o_mb-xs" style="color: #424651;margin-top: 0px;margin-bottom: 8px;">Stingy yikes enchantingly rebuilt</p>
+                        <p class="o_text-xs o_mb-xs" style="font-size: 14px;line-height: 21px;margin-top: 0px;margin-bottom: 8px;">
+                          Color: Black<br>
+                          Size: M
+                        </p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td><td width="100" align="right" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-1 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 100px;">
+                      <div class="o_hide-xs" style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
+                      <div class="o_px-xs o_sans o_text o_text-secondary o_right o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;text-align: right;padding-left: 8px;padding-right: 8px;">
+                        <p style="margin-top: 0px;margin-bottom: 0px;">$900</p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td></tr><tr><td colspan="3" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_px-xs" style="padding-left: 8px;padding-right: 8px;">
+                      <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
+                        <tbody>
+                          <tr>
+                            <td class="o_re o_bb-light" style="font-size: 16px;line-height: 16px;height: 16px;vertical-align: top;border-bottom: 1px solid #d3dce0;">&nbsp; </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <!--[if mso]></td></tr></table><![endif]-->
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!--[if mso]></td></tr></table><![endif]-->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- product -->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
+      <tbody>
+        <tr>
+          <td class="o_bg-light o_px-xs" align="center" style="background-color: #dbe5ea;padding-left: 8px;padding-right: 8px;">
+            <!--[if mso]><table width="632" cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td><![endif]-->
+            <table class="o_block" width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation" style="max-width: 632px;margin: 0 auto;">
+              <tbody>
+                <tr>
+                  <td class="o_re o_bg-white o_px o_pt" align="center" style="font-size: 0;vertical-align: top;background-color: #ffffff;padding-left: 16px;padding-right: 16px;padding-top: 16px;">
+                    <!--[if mso]><table cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td width="200" align="center" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-2 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 200px;">
+                      <div class="o_px-xs o_sans o_text o_center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;text-align: center;padding-left: 8px;padding-right: 8px;">
+                        <p style="margin-top: 0px;margin-bottom: 0px;"><a class="o_text-primary" href="#" style="text-decoration: none;outline: none;color: #126de5;"><img src="images/thumb_184.jpg" width="184" height="184" alt="" style="max-width: 184px;-ms-interpolation-mode: bicubic;vertical-align: middle;border: 0;line-height: 100%;height: auto;outline: none;text-decoration: none;"></a></p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td><td width="300" align="left" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-3 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 300px;">
+                      <div style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
+                      <div class="o_px-xs o_sans o_text o_text-light o_left o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #82899a;text-align: left;padding-left: 8px;padding-right: 8px;">
+                        <h4 class="o_heading o_text-dark o_mb-xxs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 4px;color: #242b3d;font-size: 18px;line-height: 23px;">Awesome Product Title</h4>
+                        <p class="o_text-secondary o_mb-xs" style="color: #424651;margin-top: 0px;margin-bottom: 8px;">Stingy yikes enchantingly rebuilt</p>
+                        <p class="o_text-xs o_mb-xs" style="font-size: 14px;line-height: 21px;margin-top: 0px;margin-bottom: 8px;">
+                          Color: Black<br>
+                          Size: M
+                        </p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td><td width="100" align="right" valign="top" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_col o_col-1 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 100px;">
+                      <div class="o_hide-xs" style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
+                      <div class="o_px-xs o_sans o_text o_text-secondary o_right o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;text-align: right;padding-left: 8px;padding-right: 8px;">
+                        <p style="margin-top: 0px;margin-bottom: 0px;">$900</p>
+                      </div>
+                    </div>
+                    <!--[if mso]></td></tr><tr><td colspan="3" style="padding: 0px 8px;"><![endif]-->
+                    <div class="o_px-xs" style="padding-left: 8px;padding-right: 8px;">
+                      <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
+                        <tbody>
+                          <tr>
+                            <td class="o_re o_bb-light" style="font-size: 16px;line-height: 16px;height: 16px;vertical-align: top;border-bottom: 1px solid #d3dce0;">&nbsp; </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <!--[if mso]></td></tr></table><![endif]-->
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!--[if mso]></td></tr></table><![endif]-->
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <!-- invoice-total -->
     <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
       <tbody>
@@ -535,31 +467,15 @@ function get_email_template($order_id,$connect){
                                     <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">Subtotal</p>
                                   </td>
                                   <td width="50%" class="o_pt-xs" align="right" style="padding-top: 8px;">
-                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">$'.$_SESSION['checkout']['subtotal'].'</p>
+                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">$4,050 USD</p>
                                   </td>
                                 </tr>
                                 <tr>
                                   <td width="50%" class="o_pt-xs" align="left" style="padding-top: 8px;">
-                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">Discount</p>
+                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">Shipping</p>
                                   </td>
                                   <td width="50%" class="o_pt-xs" align="right" style="padding-top: 8px;">
-                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">$'.$_SESSION['checkout']['discount'].'</p>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td width="50%" class="o_pt-xs" align="left" style="padding-top: 8px;">
-                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">Ecotax</p>
-                                  </td>
-                                  <td width="50%" class="o_pt-xs" align="right" style="padding-top: 8px;">
-                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">$'.$_SESSION['checkout']['ecotax'].'</p>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td width="50%" class="o_pt-xs" align="left" style="padding-top: 8px;">
-                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">Vat</p>
-                                  </td>
-                                  <td width="50%" class="o_pt-xs" align="right" style="padding-top: 8px;">
-                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">$'.$_SESSION['checkout']['vat'].'</p>
+                                    <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;">$2,000 USD</p>
                                   </td>
                                 </tr>
                                 <tr>
@@ -571,7 +487,7 @@ function get_email_template($order_id,$connect){
                                     <p class="o_sans o_text o_text-secondary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;"><strong>Total Due</strong></p>
                                   </td>
                                   <td width="50%" class="o_pt" align="right" style="padding-top: 16px;">
-                                    <p class="o_sans o_text o_text-primary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #126de5;"><strong>$'.$_SESSION['checkout']['total'].'</strong></p>
+                                    <p class="o_sans o_text o_text-primary" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #126de5;"><strong>$2,000 USD</strong></p>
                                   </td>
                                 </tr>
                               </tbody>
@@ -667,83 +583,3 @@ function get_email_template($order_id,$connect){
     </table>
   </body>
 </html>
- ';
-
- return $template;
-}
-
-//GET SINGLE ADDRESS
-function get_single_address($id,$connect){
-    $q=$connect->prepare("SELECT company,address1,address2,city,state,country,postcode FROM address WHERE id=:id");
-    $q->execute([':id'=>$id]);
-    $data=$q->fetch(PDO::FETCH_ASSOC);
-    return implode(',',array_filter($data));
-}
-
-
-//GET CART PRODUCTS FOR MAIL
-function get_cart_product(){
-    $data='';
-    foreach($_SESSION['cart'] as $l){
-        $data.=get_single_cart_product($l);
-    }
-    return $data;
-}
-function get_single_cart_product($l){
-    return '
-    <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
-    <tbody>
-      <tr>
-        <td class="o_bg-light o_px-xs" align="center" style="background-color: #dbe5ea;padding-left: 8px;padding-right: 8px;">
-          <!--[if mso]><table width="632" cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td><![endif]-->
-          <table class="o_block" width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation" style="max-width: 632px;margin: 0 auto;">
-            <tbody>
-              <tr>
-                <td class="o_re o_bg-white o_px o_pt" align="center" style="font-size: 0;vertical-align: top;background-color: #ffffff;padding-left: 16px;padding-right: 16px;padding-top: 16px;">
-                  <!--[if mso]><table cellspacing="0" cellpadding="0" border="0" role="presentation"><tbody><tr><td width="200" align="center" valign="top" style="padding: 0px 8px;"><![endif]-->
-                  <div class="o_col o_col-2 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 200px;">
-                    <div class="o_px-xs o_sans o_text o_center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;text-align: center;padding-left: 8px;padding-right: 8px;">
-                      <p style="margin-top: 0px;margin-bottom: 0px;"><a class="o_text-primary" href="#" style="text-decoration: none;outline: none;color: #126de5;"><img src="images/thumb_184.jpg" width="184" height="184" alt="" style="max-width: 184px;-ms-interpolation-mode: bicubic;vertical-align: middle;border: 0;line-height: 100%;height: auto;outline: none;text-decoration: none;"></a></p>
-                    </div>
-                  </div>
-                  <!--[if mso]></td><td width="300" align="left" valign="top" style="padding: 0px 8px;"><![endif]-->
-                  <div class="o_col o_col-3 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 300px;">
-                    <div style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
-                    <div class="o_px-xs o_sans o_text o_text-light o_left o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #82899a;text-align: left;padding-left: 8px;padding-right: 8px;">
-                      <h4 class="o_heading o_text-dark o_mb-xxs" style="font-family: Helvetica, Arial, sans-serif;font-weight: bold;margin-top: 0px;margin-bottom: 4px;color: #242b3d;font-size: 18px;line-height: 23px;">'.$l['name'].'</h4>
-                      
-                      <p class="o_text-xs o_mb-xs" style="font-size: 14px;line-height: 21px;margin-top: 0px;margin-bottom: 8px;">
-                        Price: '.$l['price'].'<br>
-                        Quantity: '.$l['qty'].'
-                      </p>
-                    </div>
-                  </div>
-                  <!--[if mso]></td><td width="100" align="right" valign="top" style="padding: 0px 8px;"><![endif]-->
-                  <div class="o_col o_col-1 o_col-full" style="display: inline-block;vertical-align: top;width: 100%;max-width: 100px;">
-                    <div class="o_hide-xs" style="font-size: 24px; line-height: 24px; height: 24px;">&nbsp; </div>
-                    <div class="o_px-xs o_sans o_text o_text-secondary o_right o_xs-center" style="font-family: Helvetica, Arial, sans-serif;margin-top: 0px;margin-bottom: 0px;font-size: 16px;line-height: 24px;color: #424651;text-align: right;padding-left: 8px;padding-right: 8px;">
-                      <p style="margin-top: 0px;margin-bottom: 0px;">$'.$l['price']*$l['qty'].'</p>
-                    </div>
-                  </div>
-                  <!--[if mso]></td></tr><tr><td colspan="3" style="padding: 0px 8px;"><![endif]-->
-                  <div class="o_px-xs" style="padding-left: 8px;padding-right: 8px;">
-                    <table width="100%" cellspacing="0" cellpadding="0" border="0" role="presentation">
-                      <tbody>
-                        <tr>
-                          <td class="o_re o_bb-light" style="font-size: 16px;line-height: 16px;height: 16px;vertical-align: top;border-bottom: 1px solid #d3dce0;">&nbsp; </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <!--[if mso]></td></tr></table><![endif]-->
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <!--[if mso]></td></tr></table><![endif]-->
-        </td>
-      </tr>
-    </tbody>
-  </table>
-    ';
-}

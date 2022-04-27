@@ -76,6 +76,8 @@ include_once "../../includes/sidebar.php";
     <section class="content">
         <div class="container-fluid">
             <?=show_flash('order_success') ?>
+            <?=show_flash('order_edit_warning') ?>
+            <?=show_flash('order_edit_error') ?>
             <!-- general form elements -->
             <div class="card card-outline card-info">
                 <div class="card-body">

@@ -23,30 +23,48 @@ function get_order_status($id, $connect)
     return $data->name;
 }
 
-if (isset($_GET['id']) && $_GET['id'] > 0) {
-    $q = $connect->prepare("SELECT * FROM ordersummery WHERE id=:id");
-    $q->execute([':id' => $_GET['id']]);
-    $order = $q->fetch(PDO::FETCH_OBJ);
-    // var_dump($order);exit;
-    if ($q->rowCount() > 0) {
-    } else {
-        set_flash_session('customer_warning', '<div class="alert alert-warning alert-dismissible fade show" role="alert">
-        Order not found !
+if($_SERVER['REQUEST_METHOD']=='POST'){
+    $q3=$connect->prepare("UPDATE ordersummery SET payment_status=:payment_status, order_status=:order_status WHERE id=:id");
+    if($q3->execute([':payment_status'=>$_POST['payment_status'],':order_status'=>$_POST['order_status'],':id'=>$_POST['id']])){
+        set_flash_session('order_edit_success', '<div class="alert alert-success alert-dismissible fade show" role="alert">
+        Order id:'.$_POST['id'].' edited successfully !
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>');
-        // header('location:index.php');
+    }
+}
+
+if (isset($_GET['id']) && $_GET['id'] > 0) {
+    $q = $connect->prepare("SELECT * FROM ordersummery WHERE id=:id AND isactive=:active AND order_status>:order_status");
+    $q->execute([':id' => $_GET['id'],':active'=>1,':order_status'=>0]);
+    $order = $q->fetch(PDO::FETCH_OBJ);
+    // var_dump($order);exit;
+    if ($q->rowCount() > 0) {
+    } else {
+        set_flash_session('order_edit_warning', '<div class="alert alert-warning alert-dismissible fade show" role="alert">
+        You can\'t edit canceled or deleted order  !
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>');
+        header('location:index.php');
     }
 } else {
-    set_flash_session('customer_error', '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    set_flash_session('order_edit_error', '<div class="alert alert-danger alert-dismissible fade show" role="alert">
         Bad Request !
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>');
-    // header('location:index.php');
+    header('location:index.php');
 }
+
+
+//GET ALL ORDER STATUS LIST
+$q2=$connect->prepare("SELECT id,name FROM order_status WHERE isactive=:active AND id>:id");
+$q2->execute([':active'=>1,':id'=>0]);
+$order_status=$q2->fetchAll(PDO::FETCH_OBJ);
 
 
 $title = "Edit Order Details";
@@ -79,10 +97,12 @@ include_once "../../includes/sidebar.php";
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+            <?=show_flash('order_edit_success')?>
             <div class="rounded-top" style="border-top: solid 3px #17a2b8;">
                 <div class="row mt-1">
                     <p class="h5 col-md-12 text-primary">Product Details</p>
                     <form action="" method="POST" class="col-md-12 form-group row">
+                        <input type="hidden" name="id" value="<?=$order->id?>">
                         <?php foreach (get_products($order->id, $connect) as $key => $sl) : ?>
                             <div class="col-md-6">
                                 <label>Product <?= $key + 1 ?></label>
@@ -130,7 +150,10 @@ include_once "../../includes/sidebar.php";
                         </div>
                         <div class="col-md-6">
                             <label>Payment Status</label>
-                            <input type="text" class="form-control form-control-sm" value="<?= $order->payment_status ? "Paid" : "Unpaid" ?>">
+                            <select name="payment_status" class="form-control form-control-sm">
+                                <option value="1" <?=$order->payment_status==1?'selected':''?>>Successful</option>
+                                <option value="0" <?=$order->payment_status==0?'selected':''?>>Unsuccessful</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label>Transaction Id</label>
@@ -138,7 +161,15 @@ include_once "../../includes/sidebar.php";
                         </div>
                         <div class="col-md-6">
                             <label>Order Status</label>
-                            <input type="text" class="form-control form-control-sm" id="i<?= $order->id ?>" value="<?= get_order_status($order->order_status, $connect) ?>">
+                            <select name="order_status" id="" class="form-control form-control-sm">
+                                <option value="" disbled selected>---Select One---</option>
+                                <?php 
+                                foreach($order_status as $l):
+                                    $_selected=$l->id==$order->order_status?"selected":'';
+                                ?>
+                                <option value="<?=$l->id?>" <?=$_selected?>><?=$l->name?></option>
+                                <?php endforeach;?>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label>Order Date</label>
