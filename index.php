@@ -1,6 +1,6 @@
 <?php
 session_status()==1?session_start():'';
-// var_dump($_SESSION);exit;
+var_dump($_SERVER);exit;
 require_once "db/connect.php";
 require_once "common/functions.php";
 $title = "Agri Express";
