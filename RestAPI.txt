@@ -1,0 +1,16 @@
+PHP Shop - https://webgrity.in/IOS-Testing/ 
+ 
+https://webgrity.in/IOS-Testing/wp-login.php 
+UN   admin@garnier        
+PW   Y7tQr%ZVtv&EQ&oaYJ 
+ 
+ 
+api secret  key: cs_a4196e9ef5d0c5a8fa7015cdca7b95b4942c5c99  
+api consumer  key: ck_542029bdf259fa5f5a26a27242d8fa8324f13d18   
+ 
+Or 
+ 
+https://webgrity.in/IOS-Testing/wp-json/wc/v3/products?consumer_key=ck_542029bdf259fa5f5a26a27242d8fa8324f13d18&consumer_secret=cs_a4196e9ef5d0c5a8fa7015cdca7b95b4942c5c99 
+ 
+https://sgwebpartners.com/how-to-use-woocommerce-api/ 
+https://woocommerce.github.io/woocommerce-rest-api-docs/?php#requirements 

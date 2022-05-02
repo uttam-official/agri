@@ -57,7 +57,7 @@
     <div class="container">
       <div class="row">
         <div class="col-md-3 col-sm-4">
-          <div id="logo"><a href="<?= BASE_URL ?>"><img src="images/logo.png" title="Agriculture" alt="Agriculture" class="img-responsive" /></a></div>
+          <div id="logo"><a href="<?= BASE_URL ?>"><img src="<?= BASE_URL ?>images/logo.png" title="Agriculture" alt="Agriculture" class="img-responsive" /></a></div>
         </div>
         <div class="col-md-9 col-sm-8">
           <div class="header-right">

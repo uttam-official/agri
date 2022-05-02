@@ -2,9 +2,21 @@
 //GET CATEGORY
 function get_category($connect)
 {
-    $q = $connect->prepare("SELECT id,name,extension FROM category  WHERE isactive=:isactive and parent=:parent ORDER BY categoryorder");
+    $q = $connect->prepare("SELECT id,name,slug_url,extension FROM category  WHERE isactive=:isactive and parent=:parent ORDER BY categoryorder");
     $q->execute([':isactive' => 1, ':parent' => 0]);
     return $q->fetchAll(PDO::FETCH_OBJ);
+}
+// GET CATEGORY ID BY SLUG
+function get_category_by_slug($slug,$connect){
+    $q=$connect->prepare('SELECT id FROM category WHERE slug_url=? AND isactive=?');
+    $q->bindValue(1,$slug);
+    $q->bindValue(2,1);
+    $q->execute();
+    if($q->rowCount()>0){
+        return $q->fetch(PDO::FETCH_OBJ)->id;
+    }else{
+        return 0;
+    }
 }
 //GET SUBCATEGORY
 function get_subcategory($parent, $connect)
@@ -46,6 +58,14 @@ function get_related_product($id, $connect)
 // GET PRODUCT BY CATEGORY
 function get_product_by_category($category, $connect)
 {
+    $q = $connect->prepare('SELECT id,name,price,image_extension FROM product WHERE category=:category AND isactive=:isactive ORDER BY created');
+    $q->execute([':category' => $category, ':isactive' => 1]);
+    return $q->fetchAll(PDO::FETCH_OBJ);
+}
+// GET PRODUCT BY CATEGORY
+function get_product_by_category_slug($slug, $connect)
+{
+    $category=get_category_by_slug($slug,$connect);
     $q = $connect->prepare('SELECT id,name,price,image_extension FROM product WHERE category=:category AND isactive=:isactive ORDER BY created');
     $q->execute([':category' => $category, ':isactive' => 1]);
     return $q->fetchAll(PDO::FETCH_OBJ);
